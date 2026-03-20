@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Blast</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ══ מסך הבית ══ -->
+    <div id="home-screen">
+        <h1>💣 Ball Blast</h1>
+
+        <div id="bank-row">
+            <div id="bank-display">
+                <span class="coin-icon">🪙</span>
+                <span id="bank-amount">0</span>
+            </div>
+            <div id="hs-display">
+                <span>שיא: גל <span id="hs-wave">0</span></span>
+                <span id="next-wave-display">ריצה חדשה מגל 1</span>
+            </div>
+        </div>
+
+        <div id="upgrade-shop">
+            <div class="shop-heading">🛒 שדרוגים</div>
+            <div id="upgrade-grid">
+                <button class="upgrade-btn" id="btn-fireRate"  onclick="buyUpgrade('fireRate')">
+                    ⚡ קצב ירי<br><small>Lv.1 · 🪙50</small>
+                </button>
+                <button class="upgrade-btn" id="btn-damage"    onclick="buyUpgrade('damage')">
+                    💥 עוצמה<br><small>Lv.1 · 🪙80</small>
+                </button>
+                <button class="upgrade-btn" id="btn-multiShot" onclick="buyUpgrade('multiShot')">
+                    🎯 רב-כדורי<br><small>Lv.1 · 🪙120</small>
+                </button>
+                <button class="upgrade-btn" id="btn-ballSize"  onclick="buyUpgrade('ballSize')">
+                    🔵 גודל כדור<br><small>Lv.1 · 🪙60</small>
+                </button>
+                <button class="upgrade-btn" id="btn-lives"     onclick="buyUpgrade('lives')">
+                    ❤️ חיים<br><small>Lv.1 · 🪙100</small>
+                </button>
+            </div>
+        </div>
+
+        <button id="start-btn" onclick="startGame()">▶ התחל משחק</button>
+
+        <div id="dev-panel">
+            <button id="dev-toggle" onclick="toggleDevMode()">🔧 מצב פיתוח: כבוי</button>
+            <div id="dev-content">
+                <div class="dev-row">
+                    <label for="dev-wave">גל התחלה</label>
+                    <input type="number" id="dev-wave" value="1" min="1" max="999" oninput="onDevWaveInput()">
+                </div>
+                <div class="dev-row">
+                    <label for="dev-coins">מטבעות</label>
+                    <input type="number" id="dev-coins" value="0" min="0" oninput="onDevCoinsInput()">
+                </div>
+            </div>
+        </div>
+
+        <div id="sound-toggle" onclick="toggleMute()" title="קול">🔊</div>
+
+        <div id="controls-hint">← → / A D לזוז &nbsp;·&nbsp; תותח יורה אוטומטית</div>
+    </div>
+
+    <!-- ══ מסך המשחק ══ -->
+    <div id="game-screen" style="display:none">
+        <div id="canvas-wrapper">
+            <canvas id="bgCanvas"   width="480" height="800"></canvas>
+            <canvas id="gameCanvas" width="480" height="800"></canvas>
+        </div>
+    </div>
+
+    <!-- Load order matters: constants first, then classes, then main loop -->
+    <script src="webgl-background.js"></script>
+    <script src="background.js"></script>
+    <script src="sound.js"></script>
+    <script src="gameState.js"></script>
+    <script src="bullet.js"></script>
+    <script src="cannon.js"></script>
+    <script src="enemy.js"></script>
+    <script src="coin.js"></script>
+    <script src="powerup.js"></script>
+    <script src="waveManager.js"></script>
+    <script src="ui.js"></script>
+    <script src="effects.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

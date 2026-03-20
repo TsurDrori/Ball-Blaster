@@ -1,0 +1,314 @@
+*, *::before, *::after {
+    margin: 0; padding: 0; box-sizing: border-box;
+}
+
+body {
+    background: #07090f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    user-select: none;
+}
+
+/* ══ מסך הבית ══ */
+
+#home-screen {
+    width: 480px;
+    background: linear-gradient(160deg, #0d1220 0%, #0a0e1a 100%);
+    border: 1px solid #1e2a40;
+    box-shadow: 0 0 60px rgba(0,80,255,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 32px 24px 24px;
+}
+
+#home-screen h1 {
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-shadow: 0 0 30px rgba(100,160,255,0.6), 0 0 60px rgba(80,120,255,0.3);
+}
+
+#bank-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: #0a1020;
+    border: 1px solid #1e2a40;
+    border-radius: 12px;
+    padding: 12px 18px;
+}
+
+#bank-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.coin-icon { font-size: 28px; }
+
+#hs-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    font-size: 13px;
+    color: #6080a0;
+}
+
+#next-wave-display {
+    color: #80a8cc;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wave-arrow {
+    background: none;
+    border: 1px solid #2a3a50;
+    border-radius: 4px;
+    color: #80a8cc;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 1px 5px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.wave-arrow:hover {
+    background: #1a2a40;
+    border-color: #4080c0;
+}
+
+.wave-arrow:disabled {
+    opacity: 0.2;
+    cursor: default;
+    pointer-events: none;
+}
+
+#next-wave-display.dev-override,
+#bank-amount.dev-override {
+    color: #f0a020;
+}
+
+/* ══ חנות שדרוגים ══ */
+
+#upgrade-shop {
+    width: 100%;
+    background: #080d18;
+    border: 1px solid #1a2438;
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+}
+
+.shop-heading {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: #6090c8;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+#upgrade-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.upgrade-btn {
+    padding: 12px 6px;
+    border: 1.5px solid #2a3550;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    background: #111827;
+    color: #8090b0;
+    transition: background 0.15s, border-color 0.15s, transform 0.08s;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.upgrade-btn small {
+    display: block;
+    font-weight: normal;
+    font-size: 11px;
+    color: #506080;
+}
+
+.upgrade-btn.affordable {
+    background: #0b2010;
+    border-color: #2a7a2a;
+    color: #c8ffc8;
+    box-shadow: 0 0 10px rgba(40,200,40,0.15);
+}
+
+.upgrade-btn.affordable small { color: #7acc7a; }
+
+.upgrade-btn.affordable:hover {
+    background: #122815;
+    border-color: #3aaa3a;
+    transform: translateY(-2px);
+}
+
+.upgrade-btn:active { transform: scale(0.96); }
+
+/* ══ כפתור התחל ══ */
+
+#start-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 20px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #1a6b1a, #2a9a2a);
+    color: #ffffff;
+    border: 2px solid #3aaa3a;
+    border-radius: 12px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: background 0.15s, transform 0.08s, box-shadow 0.15s;
+    box-shadow: 0 0 20px rgba(40,160,40,0.2);
+}
+
+#start-btn:hover {
+    background: linear-gradient(135deg, #1e8020, #30b830);
+    box-shadow: 0 0 30px rgba(40,200,40,0.35);
+    transform: translateY(-2px);
+}
+
+#start-btn:active { transform: scale(0.97); }
+
+/* ══ פאנל פיתוח ══ */
+
+#dev-panel {
+    width: 100%;
+    border: 1px dashed #252a1a;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#dev-toggle {
+    width: 100%;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #4a5a2a;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: right;
+    transition: color 0.15s, background 0.15s;
+    letter-spacing: 0.5px;
+}
+
+#dev-toggle:hover { color: #7aaa4a; background: #0d1a08; }
+
+#dev-toggle.dev-on {
+    color: #f0a020;
+    background: #1a1200;
+}
+
+#dev-toggle.dev-on:hover { background: #221800; }
+
+#dev-content {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px 12px;
+    background: #0e1006;
+    border-top: 1px dashed #2a3a1a;
+}
+
+#dev-content.open { display: flex; }
+
+.dev-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dev-row label {
+    font-size: 13px;
+    color: #8aa050;
+    flex: 1;
+}
+
+.dev-row input {
+    width: 90px;
+    padding: 5px 8px;
+    background: #080f04;
+    border: 1px solid #3a5020;
+    border-radius: 6px;
+    color: #d0f080;
+    font-size: 14px;
+    font-family: monospace;
+    text-align: center;
+}
+
+.dev-row input:focus {
+    outline: none;
+    border-color: #6a9a30;
+    box-shadow: 0 0 6px rgba(100,180,40,0.3);
+}
+
+#controls-hint {
+    font-size: 12px;
+    color: #334455;
+}
+
+#sound-toggle {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s, transform 0.1s;
+    user-select: none;
+    z-index: 999;
+}
+#sound-toggle:hover { opacity: 1; transform: scale(1.15); }
+#sound-toggle.muted { opacity: 0.3; }
+
+/* ══ מסך המשחק ══ */
+
+#game-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#canvas-wrapper {
+    position: relative;
+    width: 480px;
+    height: 800px;
+    box-shadow: 0 0 40px rgba(0,100,255,0.15);
+}
+
+#bgCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    display: block;
+    width: 480px;
+    height: 800px;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    display: block;
+    cursor: default;
+    width: 480px;
+    height: 800px;
+}
