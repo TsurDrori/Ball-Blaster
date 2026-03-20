@@ -58,6 +58,17 @@ function handlePickerClick(cx, cy) {
     }
 }
 
+// ── Responsive scaling ────────────────────
+function resizeGame() {
+    const scale = Math.min(
+        window.innerWidth  / 480,
+        window.innerHeight / 800
+    );
+    document.documentElement.style.setProperty('--game-scale', scale);
+}
+window.addEventListener('resize', resizeGame);
+resizeGame();
+
 // ── Input ────────────────────────────────
 const keys = {};
 let touchX  = null;
@@ -209,7 +220,7 @@ function refreshHomeScreen() {
 function startGame() {
     sound.unlock();
     document.getElementById('home-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('game-screen').style.display = 'flex';
 
     // Roguelite: always start at wave 1 (dev mode can override)
     const startWave = devMode

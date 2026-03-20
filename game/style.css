@@ -9,14 +9,17 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    min-height: 100dvh;
     font-family: 'Arial', sans-serif;
     user-select: none;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* ══ מסך הבית ══ */
 
 #home-screen {
-    width: 480px;
+    width: min(480px, 100%);
     background: linear-gradient(160deg, #0d1220 0%, #0a0e1a 100%);
     border: 1px solid #1e2a40;
     box-shadow: 0 0 60px rgba(0,80,255,0.12);
@@ -25,6 +28,9 @@ body {
     align-items: center;
     gap: 20px;
     padding: 32px 24px 24px;
+    max-height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #home-screen h1 {
@@ -284,9 +290,13 @@ body {
 /* ══ מסך המשחק ══ */
 
 #game-screen {
+    position: fixed;
+    inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    background: #07090f;
 }
 
 #canvas-wrapper {
@@ -294,6 +304,8 @@ body {
     width: 480px;
     height: 800px;
     box-shadow: 0 0 40px rgba(0,100,255,0.15);
+    transform: scale(var(--game-scale, 1));
+    transform-origin: center center;
 }
 
 #bgCanvas {
@@ -302,6 +314,7 @@ body {
     display: block;
     width: 480px;
     height: 800px;
+    touch-action: none;
 }
 
 #gameCanvas {
@@ -311,4 +324,25 @@ body {
     cursor: default;
     width: 480px;
     height: 800px;
+    touch-action: none;
+}
+
+/* ══ מסכים קטנים ══ */
+@media (max-width: 400px) {
+    #home-screen {
+        padding: 20px 12px 16px;
+        gap: 14px;
+    }
+    #home-screen h1 { font-size: 34px; }
+    .upgrade-btn { padding: 10px 4px; font-size: 12px; }
+    #start-btn { padding: 13px; font-size: 17px; }
+    #bank-display { font-size: 22px; }
+}
+
+@media (max-height: 600px) and (orientation: portrait) {
+    #home-screen {
+        padding: 14px 16px 12px;
+        gap: 10px;
+    }
+    #home-screen h1 { font-size: 28px; }
 }
