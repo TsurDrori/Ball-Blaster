@@ -5,7 +5,7 @@
 
 const BG_SYSTEM = (() => {
 
-    const ZONE_COUNT = 5;
+    const ZONE_COUNT = 10;
 
     let currentZone = 0;
     let prevZone    = 0;

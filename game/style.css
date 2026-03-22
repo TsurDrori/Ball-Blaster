@@ -56,12 +56,23 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 26px;
+    font-size: 30px;
     font-weight: bold;
     color: #ffd700;
+    text-shadow: 0 0 18px rgba(255,215,0,0.4);
 }
 
-.coin-icon { font-size: 28px; }
+.coin-icon { font-size: 30px; }
+
+@keyframes coin-bump {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+.bank-amount-bump {
+    animation: coin-bump 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
 #hs-display {
     display: flex;
@@ -192,9 +203,10 @@ body {
 
 .shop-tab.active {
     background: #0a1830;
-    border-color: #3060a0;
-    color: #80b8ff;
-    box-shadow: 0 0 12px rgba(40,100,200,0.2);
+    border-color: #4878c8;
+    border-bottom: 2.5px solid #5898ff;
+    color: #a8d0ff;
+    box-shadow: 0 0 20px rgba(50,120,240,0.4);
 }
 
 .shop-tab:hover:not(.active) {
@@ -273,18 +285,20 @@ body {
     background: #0a1630;
 }
 
-.skin-card.locked .skin-card-emoji {
-    filter: blur(4px);
-    opacity: 0.5;
+.skin-card.locked .skin-card-canvas {
+    filter: blur(5px);
+    opacity: 0.45;
 }
 
 .skin-card.locked .skin-card-name {
     opacity: 0.4;
 }
 
-.skin-card-emoji {
-    font-size: 28px;
-    line-height: 1;
+.skin-card-canvas {
+    width: 60px;
+    height: 60px;
+    display: block;
+    border-radius: 8px;
 }
 
 .skin-card-name {
@@ -404,6 +418,11 @@ body {
 
 /* ══ כפתור התחל ══ */
 
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(40,200,40,0.2); }
+    50%       { box-shadow: 0 0 45px rgba(40,220,40,0.6), 0 0 90px rgba(30,180,30,0.15); }
+}
+
 #start-btn {
     width: 100%;
     padding: 16px;
@@ -416,7 +435,7 @@ body {
     cursor: pointer;
     letter-spacing: 2px;
     transition: background 0.15s, transform 0.08s, box-shadow 0.15s;
-    box-shadow: 0 0 20px rgba(40,160,40,0.2);
+    animation: pulse-glow 2.5s ease-in-out infinite;
 }
 
 #start-btn:hover {
@@ -663,6 +682,65 @@ body {
     color: #ff8888;
 }
 .pause-exit-btn:hover { filter: brightness(1.3); }
+
+/* ══ שדרוג מקסימום ══ */
+
+.upgrade-btn.max-level {
+    background: #1c1600;
+    border-color: #9a7700;
+    color: #ffd040;
+    box-shadow: 0 0 12px rgba(180,140,0,0.2);
+    cursor: default;
+}
+
+.upgrade-btn.max-level small { color: #7a5e10; }
+
+.upgrade-btn.max-level:hover {
+    transform: none;
+    background: #1c1600;
+    border-color: #9a7700;
+}
+
+.max-badge {
+    display: inline-block;
+    background: #9a7700;
+    color: #ffe566;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 1px 5px;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+/* ══ נדירות סקינים ══ */
+
+.skin-rarity-badge {
+    position: absolute;
+    top: -9px;
+    left: -4px;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.skin-rarity-badge.rare        { background: #1a2a5a; color: #80a8ff; border: 1px solid #3a5ab8; }
+.skin-rarity-badge.epic        { background: #28104a; color: #c080ff; border: 1px solid #6830a8; }
+.skin-rarity-badge.legendary   { background: #3a1500; color: #ffaa40; border: 1px solid #aa4f00; }
+
+.skin-card.rarity-rare.locked        { border-color: #1e2f7a; }
+.skin-card.rarity-epic.locked        { border-color: #3f1870; }
+.skin-card.rarity-legendary.locked   { border-color: #6a2800; }
+
+.skin-card.rarity-rare.unlocked      { border-color: #3858b8; box-shadow: 0 0 8px rgba(70,110,220,0.2); }
+.skin-card.rarity-epic.unlocked      { border-color: #7838b8; box-shadow: 0 0 8px rgba(130,50,190,0.25); }
+.skin-card.rarity-legendary.unlocked { border-color: #b86000; box-shadow: 0 0 10px rgba(190,90,0,0.3); }
+
+.skin-card.rarity-rare.equipped      { border-color: #5080e0; box-shadow: 0 0 10px rgba(90,140,240,0.3); }
+.skin-card.rarity-epic.equipped      { border-color: #9050e0; box-shadow: 0 0 10px rgba(160,80,220,0.35); }
+.skin-card.rarity-legendary.equipped { border-color: #e07800; box-shadow: 0 0 14px rgba(220,110,0,0.45); }
 
 /* ══ כפתור אפס שדרוגים בפיתוח ══ */
 .dev-reset-btn {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ball Blast</title>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -103,25 +103,30 @@
     </div>
 
     <!-- Load order matters: constants first, then classes, then main loop -->
-    <script src="skins.js?v=4"></script>
-    <script src="webgl-background.js?v=4"></script>
-    <script src="background.js?v=4"></script>
-    <script src="sound.js?v=4"></script>
-    <script src="gameState.js?v=4"></script>
-    <script src="bullet.js?v=4"></script>
-    <script src="cannon.js?v=4"></script>
-    <script src="enemy.js?v=4"></script>
-    <script src="coin.js?v=4"></script>
-    <script src="powerup.js?v=4"></script>
-    <script src="waveManager.js?v=4"></script>
-    <script src="ui.js?v=4"></script>
-    <script src="effects.js?v=4"></script>
-    <script src="game.js?v=4"></script>
+    <script src="skins.js?v=5"></script>
+    <script src="webgl-background.js?v=5"></script>
+    <script src="background.js?v=5"></script>
+    <script src="sound.js?v=5"></script>
+    <script src="gameState.js?v=5"></script>
+    <script src="bullet.js?v=5"></script>
+    <script src="cannon.js?v=5"></script>
+    <script src="enemy.js?v=5"></script>
+    <script src="coin.js?v=5"></script>
+    <script src="powerup.js?v=5"></script>
+    <script src="waveManager.js?v=5"></script>
+    <script src="ui.js?v=5"></script>
+    <script src="effects.js?v=5"></script>
+    <script src="game.js?v=5"></script>
     <script>
-        // מלא את רשימת הבוסטים בפאנל הפיתוח
-        const sel = document.getElementById('dev-boost');
-        sel.innerHTML = '<option value="">ללא בוסט</option>' +
-            RUN_UPGRADE_POOL.map(u => `<option value="${u.id}">${u.icon} ${u.name}</option>`).join('');
+        // הצג פאנל פיתוח רק אם הכתובת מכילה ?dev
+        if (!new URLSearchParams(window.location.search).has('dev')) {
+            document.getElementById('dev-panel').remove();
+        } else {
+            // מלא את רשימת הבוסטים בפאנל הפיתוח
+            const sel = document.getElementById('dev-boost');
+            sel.innerHTML = '<option value="">ללא בוסט</option>' +
+                RUN_UPGRADE_POOL.map(u => `<option value="${u.id}">${u.icon} ${u.name}</option>`).join('');
+        }
     </script>
 </body>
 </html>

@@ -23,6 +23,21 @@ let healKillCount = 0; // kills toward next heal-on-kill
 // ── Run upgrade picker ────────────────────
 let upgradePickOptions = []; // empty = no picker; 3 items = show picker
 
+// ── לולאת אנימציה לתצוגה מקדימה של סקינים ───────────────────────────────────
+let _previewRafId = null;
+function _ensurePreviewAnim() {
+    if (_previewRafId !== null) return;
+    function _previewTick() {
+        const shop = document.getElementById('skins-shop');
+        if (shop && shop.offsetParent !== null) {
+            document.querySelectorAll('.skin-card-canvas').forEach(c =>
+                drawSkinPreview(c, c.dataset.skin, c.dataset.type));
+        }
+        _previewRafId = requestAnimationFrame(_previewTick);
+    }
+    _previewRafId = requestAnimationFrame(_previewTick);
+}
+
 const RUN_UPGRADE_POOL = [
     { id: 'magnetic',     icon: '🧲', name: 'מגנט מטבעות',  desc: 'רדיוס איסוף מטבעות כפול' },
     { id: 'gold_rush',    icon: '💰', name: 'בונוס זהב',     desc: 'ערך כל המטבעות ×1.5' },
@@ -287,13 +302,22 @@ function _renderSkinGrid(type, catalog, gridId) {
             btn = `<div class="skin-card-btn btn-locked">💎 ${skin.price.toLocaleString()}</div>`;
         }
 
-        return `<div class="skin-card ${statusClass}">
-            <div class="skin-card-emoji">${skin.emoji}</div>
+        const rarity = skin.rarity || 'common';
+        const rarityLabels = { rare: 'נדיר', epic: 'אפי', legendary: 'מיתי' };
+        const rarityBadge = rarity !== 'common'
+            ? `<div class="skin-rarity-badge ${rarity}">${rarityLabels[rarity]}</div>`
+            : '';
+
+        return `<div class="skin-card ${statusClass} rarity-${rarity}">
+            ${rarityBadge}
+            <canvas class="skin-card-canvas" width="60" height="60" data-skin="${skin.id}" data-type="${type}"></canvas>
             <div class="skin-card-name">${skin.name}</div>
             <div class="skin-card-price">${priceText}</div>
             ${btn}
         </div>`;
     }).join('');
+
+    _ensurePreviewAnim();
 }
 
 function buySkin(id, type) {
@@ -313,11 +337,23 @@ function equipSkin(id, type) {
     }
 }
 
-function refreshHomeScreen() {
-    document.getElementById('bank-amount').textContent = gameState.totalCoins.toLocaleString();
-    document.getElementById('bank-amount').classList.toggle('dev-override', devMode);
-    document.getElementById('hs-wave').textContent     = gameState.highScore;
+let _prevBankCoins = -1;
 
+function refreshHomeScreen() {
+    const bankEl   = document.getElementById('bank-amount');
+    const newCoins = gameState.totalCoins;
+    bankEl.textContent = newCoins.toLocaleString();
+    bankEl.classList.toggle('dev-override', devMode);
+    if (_prevBankCoins >= 0 && newCoins > _prevBankCoins) {
+        bankEl.classList.remove('bank-amount-bump');
+        void bankEl.offsetWidth; // force reflow to restart animation
+        bankEl.classList.add('bank-amount-bump');
+    }
+    _prevBankCoins = newCoins;
+
+    document.getElementById('hs-wave').textContent = gameState.highScore;
+
+    const MAX_LEVELS = { fireRate: Infinity, damage: 8, multiShot: 5, ballSize: Infinity, lives: Infinity };
     const meta = {
         fireRate:  { icon: '⚡', name: 'קצב ירי',   desc: lv => `${Math.round(10 / Math.max(0.025, 0.16 - (lv-1)*0.015))/10} כדורים/שנ'` },
         damage:    { icon: '💥', name: 'עוצמה',     desc: lv => `נזק ${Math.min(8, lv)} לכדור` },
@@ -326,12 +362,20 @@ function refreshHomeScreen() {
         lives:     { icon: '❤️', name: 'חיים',       desc: lv => `${lv} חיים למשחק` },
     };
     for (const [type, m] of Object.entries(meta)) {
-        const btn  = document.getElementById('btn-' + type);
+        const btn   = document.getElementById('btn-' + type);
         if (!btn) continue;
-        const lv   = gameState.upgrades[type];
-        const cost = gameState.upgradeCost(type);
-        btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
-        btn.className = 'upgrade-btn' + (gameState.canAfford(type) ? ' affordable' : '');
+        const lv    = gameState.upgrades[type];
+        const cost  = gameState.upgradeCost(type);
+        const isMax = lv >= MAX_LEVELS[type];
+        if (isMax) {
+            btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small><span class="max-badge">MAX</span></small>`;
+            btn.className = 'upgrade-btn max-level';
+            btn.disabled  = true;
+        } else {
+            btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
+            btn.className = 'upgrade-btn' + (gameState.canAfford(type) ? ' affordable' : '');
+            btn.disabled  = false;
+        }
     }
 }
 
@@ -425,11 +469,14 @@ function checkCollisions() {
     for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
         if (b.dead) continue;
+        if (gameState.iceTimer > 0) continue; // קרח קופא - כדורים לא פוגעים
         for (let j = enemies.length - 1; j >= 0; j--) {
             const e = enemies[j];
             if (e.dead) continue;
+            if (b.hitEnemies.has(e)) continue; // כבר פגע באויב זה - דלג
             const minD = b.radius + e.radius;
             if (dist2(b.x, b.y, e.x, e.y) < minD * minD) {
+                b.hitEnemies.add(e); // סמן אויב זה כ"נפגע"
                 const dmg = b.damage;
                 e.hit(dmg);
 

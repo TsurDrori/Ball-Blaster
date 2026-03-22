@@ -1,29 +1,29 @@
 // ─── Skin catalogue ───────────────────────────────────────────────────────────
 
 const CANNON_SKINS = [
-    { id: 'default', name: 'תותח רגיל',  emoji: '🔫', price: 0,   mission: null },
-    { id: 'gold',    name: 'תותח זהב',   emoji: '✨',  price: 40,  mission: null },
-    { id: 'diamond', name: 'תותח יהלום', emoji: '💎',  price: 70,  mission: null },
-    { id: 'rocket',  name: 'רקטן',       emoji: '🚀',  price: 90,  mission: null },
-    { id: 'rainbow', name: 'קשת בענן',   emoji: '🌈',  price: 0,   mission: { id: 'buy_4_skins',   text: 'קנה 4 סקינים' } },
-    { id: 'dragon',  name: 'דרקון',      emoji: '🐲',  price: 120, mission: null },
-    { id: 'shark',   name: 'כריש',       emoji: '🦈',  price: 70,  mission: null },
-    { id: 'unicorn', name: 'חד קרן',     emoji: '🦄',  price: 0,   mission: { id: 'reach_wave_15', text: 'הגע לגל 15' } },
+    { id: 'default', name: 'תותח רגיל',  emoji: '🔫', price: 0,   mission: null,                                                rarity: 'common'    },
+    { id: 'gold',    name: 'תותח זהב',   emoji: '✨',  price: 40,  mission: null,                                                rarity: 'common'    },
+    { id: 'diamond', name: 'תותח יהלום', emoji: '💎',  price: 70,  mission: null,                                                rarity: 'rare'      },
+    { id: 'rocket',  name: 'רקטן',       emoji: '🚀',  price: 90,  mission: null,                                                rarity: 'rare'      },
+    { id: 'rainbow', name: 'קשת בענן',   emoji: '🌈',  price: 0,   mission: { id: 'buy_4_skins',   text: 'קנה 4 סקינים' },      rarity: 'epic'      },
+    { id: 'dragon',  name: 'דרקון',      emoji: '🐲',  price: 120, mission: null,                                                rarity: 'legendary' },
+    { id: 'shark',   name: 'כריש',       emoji: '🦈',  price: 70,  mission: null,                                                rarity: 'rare'      },
+    { id: 'unicorn', name: 'חד קרן',     emoji: '🦄',  price: 0,   mission: { id: 'reach_wave_15', text: 'הגע לגל 15' },        rarity: 'legendary' },
 ];
 
 const BULLET_SKINS = [
-    { id: 'default',   name: 'כדורים רגילים', emoji: '🔵', price: 0,  mission: null },
-    { id: 'purple',    name: 'סגולים',        emoji: '💜', price: 20, mission: null },
-    { id: 'star',      name: 'כוכבים',        emoji: '⭐', price: 50, mission: null },
-    { id: 'ice',       name: 'קרח',           emoji: '❄️', price: 65, mission: null },
-    { id: 'ruby',      name: 'יהלומי אודם',   emoji: '🔴', price: 0,  mission: { id: 'firerate_lv4', text: 'שדרג קצב ירי לרמה 4' } },
-    { id: 'lightning', name: 'ברק',           emoji: '⚡', price: 50, mission: null },
-    { id: 'donut',     name: 'דונאט',         emoji: '🍩', price: 20, mission: null },
-    { id: 'skull',     name: 'גולגולת',       emoji: '💀', price: 35, mission: null },
-    { id: 'bubble',    name: 'בועת סבון',     emoji: '🫧', price: 20, mission: null },
-    { id: 'target',    name: 'מטרה',          emoji: '🎯', price: 50, mission: null },
-    { id: 'clover',    name: 'תלתן מזל',      emoji: '🍀', price: 0,  mission: { id: 'reach_wave_20', text: 'הגע לגל 20' } },
-    { id: 'butterfly', name: 'פרפר',          emoji: '🦋', price: 0,  mission: { id: 'buy_5_skins',   text: 'קנה 5 סקינים' } },
+    { id: 'default',   name: 'כדורים רגילים', emoji: '🔵', price: 0,  mission: null,                                                    rarity: 'common'    },
+    { id: 'purple',    name: 'סגולים',        emoji: '💜', price: 20, mission: null,                                                    rarity: 'common'    },
+    { id: 'star',      name: 'כוכבים',        emoji: '⭐', price: 50, mission: null,                                                    rarity: 'common'    },
+    { id: 'ice',       name: 'קרח',           emoji: '❄️', price: 65, mission: null,                                                    rarity: 'rare'      },
+    { id: 'ruby',      name: 'יהלומי אודם',   emoji: '🔴', price: 0,  mission: { id: 'firerate_lv4', text: 'שדרג קצב ירי לרמה 4' },    rarity: 'epic'      },
+    { id: 'lightning', name: 'ברק',           emoji: '⚡', price: 50, mission: null,                                                    rarity: 'rare'      },
+    { id: 'donut',     name: 'דונאט',         emoji: '🍩', price: 20, mission: null,                                                    rarity: 'common'    },
+    { id: 'skull',     name: 'גולגולת',       emoji: '💀', price: 35, mission: null,                                                    rarity: 'common'    },
+    { id: 'bubble',    name: 'בועת סבון',     emoji: '🫧', price: 20, mission: null,                                                    rarity: 'common'    },
+    { id: 'target',    name: 'מטרה',          emoji: '🎯', price: 50, mission: null,                                                    rarity: 'rare'      },
+    { id: 'clover',    name: 'תלתן מזל',      emoji: '🍀', price: 0,  mission: { id: 'reach_wave_20', text: 'הגע לגל 20' },            rarity: 'epic'      },
+    { id: 'butterfly', name: 'פרפר',          emoji: '🦋', price: 0,  mission: { id: 'buy_5_skins',   text: 'קנה 5 סקינים' },          rarity: 'legendary' },
 ];
 
 // ─── Helper: draw N-point star ────────────────────────────────────────────────
@@ -488,6 +488,84 @@ function _drawUnicornCannon(ctx, c) {
 }
 
 // ─── Bullet skin draw dispatcher ─────────────────────────────────────────────
+// ─── תצוגה מקדימה של סקין בכרטיס החנות ──────────────────────────────────────
+function _getSkinRarity(skinId, type) {
+    const catalog = type === 'cannon' ? CANNON_SKINS : BULLET_SKINS;
+    const s = catalog.find(sk => sk.id === skinId);
+    return s ? (s.rarity || 'common') : 'common';
+}
+
+function drawSkinPreview(canvas, skinId, type) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Rarity-tinted background
+    const rarity = _getSkinRarity(skinId, type);
+    const bgMap = {
+        common:    ['#1c2535', '#080e18'],
+        rare:      ['#162045', '#060f1e'],
+        epic:      ['#1e0f38', '#090416'],
+        legendary: ['#2c1100', '#100400'],
+    };
+    const [bc0, bc1] = bgMap[rarity] || bgMap.common;
+    const rbg = ctx.createRadialGradient(w * 0.38, h * 0.32, 2, w / 2, h / 2, w * 0.75);
+    rbg.addColorStop(0, bc0);
+    rbg.addColorStop(1, bc1);
+    ctx.fillStyle = rbg;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, w, h, 8);
+    ctx.fill();
+
+    if (type === 'cannon') {
+        if (skinId === 'default') {
+            const cx = w / 2, cy = h * 0.62;
+            const bg = ctx.createRadialGradient(cx - 5, cy + 4, 2, cx, cy + 8, 18);
+            bg.addColorStop(0, '#8899aa'); bg.addColorStop(1, '#334455');
+            ctx.fillStyle = bg;
+            ctx.beginPath(); ctx.ellipse(cx, cy + 8, 18, 11, 0, 0, Math.PI * 2); ctx.fill();
+            const bar = ctx.createLinearGradient(cx - 7, 0, cx + 7, 0);
+            bar.addColorStop(0, '#445566'); bar.addColorStop(0.5, '#8899aa'); bar.addColorStop(1, '#445566');
+            ctx.fillStyle = bar;
+            ctx.beginPath(); ctx.roundRect(cx - 7, cy - 20, 14, 28, 4); ctx.fill();
+            ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.stroke();
+        } else {
+            ctx.save();
+            ctx.scale(0.5, 0.5);
+            const fakeCannon = { x: w, y: 68, w: 52, h: 58, muzzleFlash: 0, hitFlash: 0 };
+            drawCannonSkin(ctx, fakeCannon, skinId);
+            ctx.restore();
+        }
+    } else {
+        if (skinId === 'default') {
+            const r = w * 0.28;
+            const g = ctx.createRadialGradient(w/2 - r*0.3, h/2 - r*0.3, 1, w/2, h/2, r);
+            g.addColorStop(0, '#88aaff'); g.addColorStop(1, '#2244bb');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(w/2, h/2, r, 0, Math.PI*2); ctx.fill();
+        } else {
+            const fakeBullet = { x: w/2, y: h/2, radius: w * 0.28 };
+            drawBulletSkin(ctx, fakeBullet, skinId);
+        }
+    }
+
+    // Rarity edge glow overlay
+    const glowMap = {
+        rare:      'rgba(70,110,230,0.38)',
+        epic:      'rgba(140,55,220,0.42)',
+        legendary: 'rgba(220,95,0,0.48)',
+    };
+    if (glowMap[rarity]) {
+        const eg = ctx.createRadialGradient(w / 2, h / 2, w * 0.22, w / 2, h / 2, w * 0.78);
+        eg.addColorStop(0, 'rgba(0,0,0,0)');
+        eg.addColorStop(1, glowMap[rarity]);
+        ctx.fillStyle = eg;
+        ctx.beginPath();
+        ctx.roundRect(0, 0, w, h, 8);
+        ctx.fill();
+    }
+}
+
 function drawBulletSkin(ctx, bullet, skinId) {
     switch (skinId) {
         case 'purple':    _drawPurpleBullet(ctx, bullet);    break;

@@ -9,6 +9,7 @@ class Bullet {
         this.type   = type; // 'normal' | 'fire'
         this.dead   = false;
         this.pierceCount = 0;  // times this bullet has pierced through an enemy
+        this.hitEnemies  = new Set(); // אויבים שכבר נפגעו מכדור זה (מונע פגיעה כפולה)
         this.bounced     = false; // for 'bouncy' run upgrade (only bounces once)
         this.homing      = false; // for 'homing' run upgrade
         this.skin        = null;  // visual skin id (set by cannon)
