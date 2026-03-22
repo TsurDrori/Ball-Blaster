@@ -75,7 +75,7 @@ class UI {
             let bx = 8;
             if (shieldT > 0) { this._drawPowerBar(ctx, bx, 58, shieldT, 8,  '🛡️', '#00aaff'); bx += 158; }
             if (fireT   > 0) { this._drawPowerBar(ctx, bx, 58, fireT,   10, '🔥', '#ff6600'); bx += 158; }
-            if (iceT    > 0) { this._drawPowerBar(ctx, bx, 58, iceT,    3,  '🧊', '#aaf0ff'); }
+            if (iceT    > 0) { this._drawPowerBar(ctx, bx, 58, iceT,    5,  '❄️', '#aaf0ff'); }
         }
 
         // Active run upgrades strip (small icons below powerup bars)

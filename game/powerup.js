@@ -48,7 +48,7 @@ class PowerUp {
         ctx.stroke();
 
         // Icon
-        const icons = { shield: '🛡️', fire: '🔥', heart: '❤️', ice: '🧊' };
+        const icons = { shield: '🛡️', fire: '🔥', heart: '❤️', ice: '❄️' };
         ctx.font         = `${Math.floor(r * 1.3)}px Arial`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';

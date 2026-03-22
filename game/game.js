@@ -545,7 +545,7 @@ function checkCollisions() {
                 const gain = gameState.hasRunUpgrade('double_heart') ? 2 : 1;
                 gameState.currentLives = Math.min(gameState.upgrades.lives + 2, gameState.currentLives + gain);
             } else if (p.type === 'ice') {
-                gameState.iceTimer = 3;
+                gameState.iceTimer = 5;
             }
             fxPowerUpCollect(p.x, p.y, p.type);
             sound.upgrade();
