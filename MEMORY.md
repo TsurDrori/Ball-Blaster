@@ -1,8 +1,12 @@
 # Ball Blast - Project Memory
 
 ## Overview
-Mac desktop version of Ball Blast mobile game.
+web version of Ball Blast mobile game.
 
+המשחק מפתוח על ידי ילדים ללא ידע באנגלית , רק עברית . 
+אם כותבים לך בעברית ענה בעברית 
+ הימנע מערבוב מילים באנגלית גם מילים כמו טייפסקירפט או ריאקט או שמות אחרים ומילות מפתח בתכנות כתוב אותם בעברית עם מצלול המילה באנגלית 
+ כל מילה שתכתוב באנגלית תשבש את ההבנה לחלוטין
 ## Docs
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Tech stack and architecture
 - [docs/MECHANICS.md](docs/MECHANICS.md) - Full game mechanics
