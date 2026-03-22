@@ -74,6 +74,10 @@
                     <label for="dev-coins">מטבעות</label>
                     <input type="number" id="dev-coins" value="0" min="0" oninput="onDevCoinsInput()">
                 </div>
+                <div class="dev-row">
+                    <label for="dev-boost">בוסט התחלה</label>
+                    <select id="dev-boost"></select>
+                </div>
             </div>
         </div>
 
@@ -113,5 +117,11 @@
     <script src="ui.js?v=3"></script>
     <script src="effects.js?v=3"></script>
     <script src="game.js?v=3"></script>
+    <script>
+        // מלא את רשימת הבוסטים בפאנל הפיתוח
+        const sel = document.getElementById('dev-boost');
+        sel.innerHTML = '<option value="">ללא בוסט</option>' +
+            RUN_UPGRADE_POOL.map(u => `<option value="${u.id}">${u.icon} ${u.name}</option>`).join('');
+    </script>
 </body>
 </html>

@@ -365,6 +365,10 @@ function startGame() {
         ? Math.max(1, parseInt(document.getElementById('dev-wave').value) || 1)
         : 1;
     gameState.startNewGame(startWave);
+    if (devMode) {
+        const boostId = document.getElementById('dev-boost').value;
+        if (boostId) gameState.runUpgrades.push(boostId);
+    }
     gameState.recordDayPlayed();
 
     initEntities();
