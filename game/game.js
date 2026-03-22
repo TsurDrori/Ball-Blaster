@@ -10,6 +10,7 @@ let lastTime          = 0;
 let lastWave          = 1;
 let announceT         = 0;
 let gameRunning       = false;
+let gamePaused        = false;
 let returnTimer       = 0;
 let hitInvulnerable   = 0;
 let powerupSpawnTimer = 0;
@@ -78,7 +79,14 @@ let mouseY  = CANVAS_H / 2;
 document.addEventListener('keydown', e => {
     sound.unlock();
     keys[e.key] = true;
-    if ((e.key === 'r' || e.key === 'R' || e.key === 'Escape') && gameState.status === 'gameover') {
+    if (e.key === 'Escape') {
+        if (gameState.status === 'gameover') {
+            returnToHome();
+        } else if (gameState.status === 'playing') {
+            togglePause();
+        }
+    }
+    if ((e.key === 'r' || e.key === 'R') && gameState.status === 'gameover') {
         returnToHome();
     }
 });
@@ -197,8 +205,161 @@ function buyUpgrade(type) {
     sound.unlock();
     if (gameState.buyUpgrade(type)) {
         sound.upgrade();
+        if (type === 'fireRate') {
+            const unlocked = gameState.checkFirerateMission();
+            if (unlocked) refreshSkinsPanel();
+        }
         refreshHomeScreen();
     }
+}
+
+// ── Skin shop ─────────────────────────────────────────────────────────────────
+function switchShopTab(tab) {
+    const upgradeShop = document.getElementById('upgrade-shop');
+    const skinsShop   = document.getElementById('skins-shop');
+    const tabU = document.getElementById('tab-upgrades');
+    const tabS = document.getElementById('tab-skins');
+    if (tab === 'upgrades') {
+        upgradeShop.style.display = '';
+        skinsShop.style.display   = 'none';
+        tabU.classList.add('active');
+        tabS.classList.remove('active');
+    } else {
+        upgradeShop.style.display = 'none';
+        skinsShop.style.display   = '';
+        tabU.classList.remove('active');
+        tabS.classList.add('active');
+        refreshSkinsPanel();
+    }
+}
+
+function switchSkinSubtab(type) {
+    const gc = document.getElementById('skin-grid-cannon');
+    const gb = document.getElementById('skin-grid-bullet');
+    const cs = document.getElementById('combo-section');
+    const tc = document.getElementById('stab-cannon');
+    const tb = document.getElementById('stab-bullet');
+    if (type === 'cannon') {
+        gc.style.display = ''; gb.style.display = 'none'; cs.style.display = 'none';
+        tc.classList.add('active'); tb.classList.remove('active');
+    } else {
+        gc.style.display = 'none'; gb.style.display = ''; cs.style.display = '';
+        tc.classList.remove('active'); tb.classList.add('active');
+    }
+}
+
+function refreshSkinsPanel() {
+    _renderSkinGrid('cannon', CANNON_SKINS, 'skin-grid-cannon');
+    _renderSkinGrid('bullet', BULLET_SKINS, 'skin-grid-bullet');
+    _renderComboGrid('combo-grid');
+}
+
+function _renderSkinGrid(type, catalog, gridId) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    const activeId = type === 'cannon' ? gameState.skins.activeCannon : gameState.skins.activeBullet;
+
+    grid.innerHTML = catalog.map(skin => {
+        const isUnlocked = gameState.hasSkinUnlocked(skin.id, type);
+        const isEquipped = activeId === skin.id;
+        const canAfford  = skin.price > 0 && gameState.totalCoins >= skin.price;
+        const statusClass = isEquipped ? 'equipped' : isUnlocked ? 'unlocked' : 'locked';
+
+        const sausageActive = gameState.skins.activeCannon === 'pan'
+            && gameState.skins.activeBullet === 'egg'
+            && gameState.hasCombo('sausage_combo');
+        const showCombo = sausageActive &&
+            ((type === 'cannon' && skin.id === 'pan') || (type === 'bullet' && skin.id === 'egg'));
+
+        let priceText;
+        if (skin.price > 0)       priceText = `🪙 ${skin.price.toLocaleString()}`;
+        else if (skin.mission)    priceText = skin.mission.text;
+        else                      priceText = 'חינם';
+
+        let btn;
+        if (isEquipped) {
+            btn = `<div class="skin-card-btn btn-equipped">✓ לובש</div>`;
+        } else if (isUnlocked) {
+            btn = `<button class="skin-card-btn btn-equip" onclick="equipSkin('${skin.id}','${type}')">ללבוש</button>`;
+        } else if (skin.mission) {
+            btn = `<div class="skin-card-btn btn-locked">🔒 ${skin.mission.text}</div>`;
+        } else if (canAfford) {
+            btn = `<button class="skin-card-btn btn-buy" onclick="buySkin('${skin.id}','${type}')">🪙 קנה</button>`;
+        } else {
+            btn = `<div class="skin-card-btn btn-locked">🪙 ${skin.price.toLocaleString()}</div>`;
+        }
+
+        return `<div class="skin-card ${statusClass}${showCombo ? ' combo-active' : ''}">
+            <div class="skin-card-emoji">${skin.emoji}</div>
+            <div class="skin-card-name">${skin.name}</div>
+            <div class="skin-card-price">${priceText}</div>
+            ${btn}
+        </div>`;
+    }).join('');
+}
+
+function buySkin(id, type) {
+    sound.unlock();
+    if (gameState.buySkin(id, type)) {
+        sound.upgrade();
+        refreshSkinsPanel();
+        refreshHomeScreen();
+    }
+}
+
+function equipSkin(id, type) {
+    sound.unlock();
+    if (gameState.equipSkin(id, type)) {
+        sound.upgrade();
+        refreshSkinsPanel();
+    }
+}
+
+function buyCombo(id) {
+    sound.unlock();
+    if (gameState.buyCombo(id)) {
+        sound.upgrade();
+        refreshSkinsPanel();
+        refreshHomeScreen();
+    }
+}
+
+function _renderComboGrid(gridId) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+
+    grid.innerHTML = COMBO_ITEMS.map(item => {
+        const isPurchased = gameState.hasCombo(item.id);
+        const hasReqs     = gameState.hasSkinUnlocked(item.requiresCannon, 'cannon')
+                         && gameState.hasSkinUnlocked(item.requiresBullet, 'bullet');
+        const canAfford   = gameState.totalCoins >= item.price;
+        const isActive    = isPurchased
+                         && gameState.skins.activeCannon === item.requiresCannon
+                         && gameState.skins.activeBullet === item.requiresBullet;
+
+        let statusClass, btn;
+        if (isPurchased) {
+            statusClass = isActive ? 'equipped' : 'unlocked';
+            btn = `<div class="skin-card-btn btn-equipped">${isActive ? '✓ פעיל!' : '✓ נקנה'}</div>`;
+        } else if (!hasReqs) {
+            statusClass = 'locked';
+            btn = `<div class="skin-card-btn btn-locked">🔒 צריך מחבת + ביצה</div>`;
+        } else if (canAfford) {
+            statusClass = '';
+            btn = `<button class="skin-card-btn btn-buy" onclick="buyCombo('${item.id}')">🪙 קנה</button>`;
+        } else {
+            statusClass = '';
+            btn = `<div class="skin-card-btn btn-locked">🪙 ${item.price.toLocaleString()}</div>`;
+        }
+
+        const reqText = `מחבת + ביצה`;
+        return `<div class="skin-card combo-card ${statusClass}">
+            <div class="skin-card-emoji">${item.emoji}</div>
+            <div class="skin-card-name">${item.name}</div>
+            <div class="skin-card-price combo-req">${isPurchased ? (isActive ? '🔥 פעיל!' : reqText) : `🪙 ${item.price} · דרוש: ${reqText}`}</div>
+            ${btn}
+        </div>`;
+    }).join('');
 }
 
 function refreshHomeScreen() {
@@ -223,6 +384,25 @@ function refreshHomeScreen() {
     }
 }
 
+// ── Pause ─────────────────────────────────
+function togglePause() {
+    if (gameState.status !== 'playing') return;
+    gamePaused = !gamePaused;
+    document.getElementById('pause-overlay').style.display = gamePaused ? 'flex' : 'none';
+    document.getElementById('pause-btn').textContent = gamePaused ? '▶' : '⏸';
+    if (!gamePaused) {
+        // מאפס את lastTime כדי שלא תהיה קפיצה בזמן
+        lastTime = performance.now();
+    }
+}
+
+function exitToHome() {
+    gamePaused = false;
+    document.getElementById('pause-overlay').style.display = 'none';
+    document.getElementById('pause-btn').textContent = '⏸';
+    returnToHome();
+}
+
 // ── Screen transitions ────────────────────
 function startGame() {
     sound.unlock();
@@ -234,19 +414,25 @@ function startGame() {
         ? Math.max(1, parseInt(document.getElementById('dev-wave').value) || 1)
         : 1;
     gameState.startNewGame(startWave);
+    gameState.recordDayPlayed();
 
     initEntities();
     lastTime    = performance.now();
     gameRunning = true;
+    gamePaused  = false;
+    document.getElementById('pause-overlay').style.display = 'none';
+    document.getElementById('pause-btn').textContent = '⏸';
     requestAnimationFrame(gameLoop);
 }
 
 function returnToHome() {
     gameRunning = false;
+    gamePaused  = false;
     gameState.status = 'home';
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('home-screen').style.display = 'flex';
     refreshHomeScreen();
+    refreshSkinsPanel();
 }
 
 // ── Init entities ─────────────────────────
@@ -362,9 +548,15 @@ function checkCollisions() {
         if (c.dead) continue;
         if (dist2(c.x, c.y, collector.x, collector.y) < cR2) {
             c.dead = true;
-            gameState.collectCoin(c.value);
-            fxCoinCollect(c.x, c.y, c.value);
-            sound.coinCollect();
+            if (c.isDiamond) {
+                gameState.collectDiamond();
+                floatingTexts.push(new FloatingText(c.x, c.y - 10, '💎 +1', '#00e5ff', 17));
+                sound.coinCollect();
+            } else {
+                gameState.collectCoin(c.value);
+                fxCoinCollect(c.x, c.y, c.value);
+                sound.coinCollect();
+            }
         }
     }
 
@@ -391,6 +583,20 @@ function checkCollisions() {
 }
 
 function spawnCoins(enemy, comboMult = 1.0) {
+    // אויב יהלום → מוריד 4-7 יהלומים (לא זהב)
+    if (enemy.type === 'crystal') {
+        const count = 4 + Math.floor(Math.random() * 4); // 4, 5, 6 או 7
+        for (let k = 0; k < count; k++) {
+            coins.push(new Coin(
+                enemy.x + (Math.random() - 0.5) * 36,
+                enemy.y,
+                1,       // ערך לא רלוונטי - יהלומים לא שווים זהב
+                true     // isDiamond
+            ));
+        }
+        return;
+    }
+
     let baseValue = enemy.coinValue;
     // 'gold_rush' run upgrade boosts all coin values
     if (gameState.hasRunUpgrade('gold_rush')) baseValue = Math.ceil(baseValue * 1.5);
@@ -442,6 +648,14 @@ function update(delta) {
     for (const e of enemies) {
         if (e.dead) continue;
         e.update(delta);
+        // יהלום שפג זמנו - נעלם ללא זהב ולא פוגע בתותח
+        if (e.dead) {
+            if (e.expired) {
+                fxEnemyDeath(e.x, e.y, e.baseColor, Math.min(e.maxHp, 40));
+                floatingTexts.push(new FloatingText(e.x, e.y - e.radius, '⌛ נעלם!', '#888888', 15));
+            }
+            continue;
+        }
         if (e.hitsCannon(cannon)) {
             if (gameState.shieldTimer > 0) {
                 gameState.shieldTimer = 0;
@@ -494,6 +708,7 @@ function update(delta) {
         announceT = 2.0;
         fxWaveClear();
         sound.waveStart(waveManager.wave);
+        gameState.checkWaveMission(waveManager.wave);
 
         // After a spike wave: show run upgrade picker
         if (waveManager.spikeWaveCleared) {
@@ -559,6 +774,11 @@ function render() {
 // ── Main loop ─────────────────────────────
 function gameLoop(ts) {
     if (!gameRunning) return;
+    if (gamePaused) {
+        lastTime = ts;
+        requestAnimationFrame(gameLoop);
+        return;
+    }
     const delta = Math.min(0.05, (ts - lastTime) / 1000);
     lastTime = ts;
     BG_SYSTEM.update(delta, waveManager ? waveManager.wave : 1);
@@ -583,3 +803,4 @@ function toggleMute() {
 
 // ── Boot: show home screen ─────────────────
 refreshHomeScreen();
+refreshSkinsPanel();

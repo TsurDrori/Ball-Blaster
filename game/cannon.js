@@ -7,6 +7,7 @@ class Cannon {
         this.fireTimer = 0;
         this.muzzleFlash = 0; // cosmetic flash timer
         this.hitFlash = 0;    // red flash when life lost
+        this.specialShotCounter = 0; // tracks shots for sausage combo
     }
 
     // Persistent upgrade base fire rate, then 'rapid' run upgrade trims 25%
@@ -45,27 +46,41 @@ class Cannon {
     }
 
     createBullets() {
-        const count  = this.bulletCount;
-        const bullets = [];
-        const step   = 22; // pixels between each cannon barrel
+        const count       = this.bulletCount;
+        const result      = [];
+        const step        = 22;
         const totalSpread = (count - 1) * step;
+        const isFire      = gameState.fireTimer > 0;
 
-        const isFire = gameState.fireTimer > 0;
-        for (let i = 0; i < count; i++) {
-            const xOffset = count > 1
-                ? -totalSpread / 2 + step * i
-                : 0;
-            bullets.push(new Bullet(
-                this.x + xOffset,
-                this.y - this.h / 2 - 4,
-                0,
-                -this.bulletSpeed,
-                isFire ? this.bulletRadius * 1.25 : this.bulletRadius,
-                isFire ? this.damage * 3 : this.damage,
-                isFire ? 'fire' : 'normal'
-            ));
+        const activeCannon = gameState.skins?.activeCannon || 'default';
+        const activeBullet = gameState.skins?.activeBullet || 'default';
+
+        // Sausage combo: pan + egg + purchased combo unlock → every 8th shot is a sausage
+        const isSausageCombo = activeCannon === 'pan' && activeBullet === 'egg'
+            && gameState.hasCombo('sausage_combo');
+        let bulletSkin   = activeBullet;
+        let damageMult   = 1;
+        let radiusMult   = 1;
+
+        if (isSausageCombo) {
+            this.specialShotCounter++;
+            if (this.specialShotCounter % 8 === 0) {
+                bulletSkin  = 'sausage';
+                damageMult  = 2.5;
+                radiusMult  = 1.5;
+            }
         }
-        return bullets;
+
+        for (let i = 0; i < count; i++) {
+            const xOffset = count > 1 ? -totalSpread / 2 + step * i : 0;
+            const radius  = (isFire ? this.bulletRadius * 1.25 : this.bulletRadius) * radiusMult;
+            const damage  = (isFire ? this.damage * 3 : this.damage) * damageMult;
+            const type    = isFire ? 'fire' : 'normal';
+            const b = new Bullet(this.x + xOffset, this.y - this.h / 2 - 4, 0, -this.bulletSpeed, radius, damage, type);
+            b.skin = isFire ? null : bulletSkin; // fire powerup overrides visuals
+            result.push(b);
+        }
+        return result;
     }
 
     _armorColors() {
@@ -108,6 +123,11 @@ class Cannon {
     }
 
     draw(ctx) {
+        const activeSkin = gameState.skins?.activeCannon || 'default';
+        if (activeSkin !== 'default') {
+            drawCannonSkin(ctx, this, activeSkin);
+            return;
+        }
         ctx.save();
         const ac = this._armorColors();
 

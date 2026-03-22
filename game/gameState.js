@@ -16,13 +16,38 @@ const gameState = {
     })(),
     highScore: parseInt(localStorage.getItem('bb_hs') || '0'),
 
+    // ── Skins & missions ─────────────────────────────────────────────────
+    skins: (() => {
+        try {
+            const s = JSON.parse(localStorage.getItem('bb_skins'));
+            const def = { unlockedCannon: ['default'], unlockedBullet: ['default'], activeCannon: 'default', activeBullet: 'default', purchasedCombos: [] };
+            return s ? Object.assign(def, s) : def;
+        } catch(e) { return { unlockedCannon: ['default'], unlockedBullet: ['default'], activeCannon: 'default', activeBullet: 'default', purchasedCombos: [] }; }
+    })(),
+    missions: (() => {
+        try {
+            const m = JSON.parse(localStorage.getItem('bb_missions'));
+            return m || { daysPlayed: [] };
+        } catch(e) { return { daysPlayed: [] }; }
+    })(),
+
     // ── Per-session ──────────────────────────────────────────────────────
     sessionCoins: 0,
+    sessionDiamonds: 0,
     wave: 1,
     currentLives: 1,
     shieldTimer: 0,
     fireTimer: 0,
     runUpgrades: [], // roguelite upgrades chosen during a run (reset each run)
+
+    // ── יהלומים (מטבע פרמיום, נשמר) ─────────────────────────────────────
+    totalDiamonds: parseInt(localStorage.getItem('bb_diamonds') || '0'),
+
+    collectDiamond() {
+        this.sessionDiamonds++;
+        this.totalDiamonds++;
+        localStorage.setItem('bb_diamonds', this.totalDiamonds);
+    },
 
     // Exponential: base × level × 2^level
     // 30% discount applied to any raw cost ≥ 300 (persistent upgrades are weaker now
@@ -77,16 +102,100 @@ const gameState = {
     // (dev mode can pass a startWave override)
     startNewGame(startWave = 1) {
         this.status       = 'playing';
-        this.sessionCoins = 0;
-        this.wave         = startWave;
-        this.currentLives = this.upgrades.lives;
-        this.shieldTimer  = 0;
-        this.fireTimer    = 0;
-        this.runUpgrades  = [];
+        this.sessionCoins    = 0;
+        this.sessionDiamonds = 0;
+        this.wave            = startWave;
+        this.currentLives    = this.upgrades.lives;
+        this.shieldTimer     = 0;
+        this.fireTimer       = 0;
+        this.runUpgrades     = [];
+    },
+
+    hasSkinUnlocked(id, type) {
+        const arr = type === 'cannon' ? this.skins.unlockedCannon : this.skins.unlockedBullet;
+        return arr.includes(id);
+    },
+
+    buySkin(id, type) {
+        const catalog = type === 'cannon' ? CANNON_SKINS : BULLET_SKINS;
+        const skin = catalog.find(s => s.id === id);
+        if (!skin || this.hasSkinUnlocked(id, type) || skin.mission || this.totalCoins < skin.price) return false;
+        this.totalCoins -= skin.price;
+        (type === 'cannon' ? this.skins.unlockedCannon : this.skins.unlockedBullet).push(id);
+        this._save();
+        this._checkBuySkinsMission();
+        return true;
+    },
+
+    equipSkin(id, type) {
+        if (!this.hasSkinUnlocked(id, type)) return false;
+        if (type === 'cannon') this.skins.activeCannon = id;
+        else                   this.skins.activeBullet = id;
+        this._save();
+        return true;
+    },
+
+    buyCombo(id) {
+        const item = COMBO_ITEMS.find(c => c.id === id);
+        if (!item || this.skins.purchasedCombos.includes(id)) return false;
+        if (!this.hasSkinUnlocked(item.requiresCannon, 'cannon')) return false;
+        if (!this.hasSkinUnlocked(item.requiresBullet, 'bullet')) return false;
+        if (this.totalCoins < item.price) return false;
+        this.totalCoins -= item.price;
+        this.skins.purchasedCombos.push(id);
+        this._save();
+        this._checkBuySkinsMission();
+        return true;
+    },
+
+    hasCombo(id) {
+        return this.skins.purchasedCombos.includes(id);
+    },
+
+    _unlockMissionSkin(missionId) {
+        let changed = false;
+        for (const skin of CANNON_SKINS) {
+            if (skin.mission?.id === missionId && !this.hasSkinUnlocked(skin.id, 'cannon')) {
+                this.skins.unlockedCannon.push(skin.id); changed = true;
+            }
+        }
+        for (const skin of BULLET_SKINS) {
+            if (skin.mission?.id === missionId && !this.hasSkinUnlocked(skin.id, 'bullet')) {
+                this.skins.unlockedBullet.push(skin.id); changed = true;
+            }
+        }
+        if (changed) this._save();
+        return changed;
+    },
+
+    checkWaveMission(wave) {
+        if (wave >= 25) return this._unlockMissionSkin('reach_wave_25');
+        return false;
+    },
+
+    checkFirerateMission() {
+        if (this.upgrades.fireRate >= 4) return this._unlockMissionSkin('firerate_lv4');
+        return false;
+    },
+
+    _checkBuySkinsMission() {
+        const total = (this.skins.unlockedCannon.length - 1)
+                    + (this.skins.unlockedBullet.length - 1)
+                    + (this.skins.purchasedCombos.length);
+        if (total >= 4) this._unlockMissionSkin('buy_4_skins');
+    },
+
+    recordDayPlayed() {
+        const today = new Date().toISOString().split('T')[0];
+        if (!this.missions.daysPlayed.includes(today)) {
+            this.missions.daysPlayed.push(today);
+            localStorage.setItem('bb_missions', JSON.stringify(this.missions));
+        }
     },
 
     _save() {
         localStorage.setItem('bb_coins',    this.totalCoins);
         localStorage.setItem('bb_upgrades', JSON.stringify(this.upgrades));
+        localStorage.setItem('bb_skins',    JSON.stringify(this.skins));
     },
 };

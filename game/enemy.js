@@ -41,7 +41,10 @@ class EnemyBall {
 
         this.dead       = false;
         this.coinValue  = Math.max(1, Math.ceil(Math.sqrt(hp)));
-        if (type === 'crystal') this.coinValue *= 2;
+        if (type === 'crystal') {
+            this.lifeTimer = 5.0; // 5 שניות להרוס לפני שנעלם
+            this.expired   = false;
+        }
 
         this.flashTimer = 0;
         this.marked     = false; // for 'marked' run upgrade
@@ -114,6 +117,16 @@ class EnemyBall {
             if (this.markTimer <= 0) this.marked = false;
         }
 
+        // יהלום: ספירה לאחור - אם לא נשבר בזמן, נעלם ללא זהב
+        if (this.type === 'crystal') {
+            this.lifeTimer -= delta;
+            if (this.lifeTimer <= 0) {
+                this.dead    = true;
+                this.expired = true;
+                return;
+            }
+        }
+
         this.vy += GRAVITY * delta;
         this.x  += this.vx * delta;
         this.y  += this.vy * delta;
@@ -152,6 +165,11 @@ class EnemyBall {
 
     draw(ctx) {
         ctx.save();
+        if (this.type === 'crystal') {
+            this._drawDiamond(ctx);
+            ctx.restore();
+            return;
+        }
 
         // Shadow
         ctx.beginPath();
@@ -226,6 +244,166 @@ class EnemyBall {
         }
 
         ctx.restore();
+    }
+
+    _drawDiamond(ctx) {
+        const r = this.radius;
+        const x = this.x, y = this.y;
+        const timerFrac = Math.max(0, Math.min(1, this.lifeTimer / 5.0));
+        const t = performance.now() * 0.001;
+
+        // === זוהר חיצוני פועם ===
+        const pulse = 0.88 + 0.12 * Math.sin(t * 3);
+        const glowR = r * 2.6 * pulse;
+        const glow = ctx.createRadialGradient(x, y, r * 0.2, x, y, glowR);
+        glow.addColorStop(0,   'rgba(120,240,255,0.55)');
+        glow.addColorStop(0.4, 'rgba(0,180,255,0.25)');
+        glow.addColorStop(1,   'rgba(0,60,200,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(x, y, glowR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // === צל ===
+        ctx.beginPath();
+        ctx.moveTo(x + 5, y - r + 6);
+        ctx.lineTo(x + r + 5, y + 6);
+        ctx.lineTo(x + 5, y + r + 6);
+        ctx.lineTo(x - r + 5, y + 6);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0,0,0,0.28)';
+        ctx.fill();
+
+        // === מחצית עליונה (בהירה) ===
+        ctx.beginPath();
+        ctx.moveTo(x,     y - r);
+        ctx.lineTo(x + r, y    );
+        ctx.lineTo(x,     y    );
+        ctx.lineTo(x - r, y    );
+        ctx.closePath();
+        const topGrad = ctx.createLinearGradient(x, y - r, x, y);
+        topGrad.addColorStop(0,   '#f0fbff');
+        topGrad.addColorStop(0.3, '#b3ecf7');
+        topGrad.addColorStop(1,   '#00d4f0');
+        ctx.fillStyle = topGrad;
+        ctx.fill();
+
+        // === מחצית תחתונה (עמוקה) ===
+        ctx.beginPath();
+        ctx.moveTo(x - r, y    );
+        ctx.lineTo(x + r, y    );
+        ctx.lineTo(x,     y + r);
+        ctx.closePath();
+        const botGrad = ctx.createLinearGradient(x, y, x, y + r);
+        botGrad.addColorStop(0, '#00BCD4');
+        botGrad.addColorStop(1, '#003d52');
+        ctx.fillStyle = botGrad;
+        ctx.fill();
+
+        // === קוי פסים (אבן חן) ===
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath();
+        ctx.moveTo(x, y - r);       ctx.lineTo(x - r * 0.48, y); // קו שמאל עליון
+        ctx.moveTo(x, y - r);       ctx.lineTo(x + r * 0.48, y); // קו ימין עליון
+        ctx.moveTo(x - r, y);       ctx.lineTo(x + r, y);         // קו אמצע (גירדל)
+        ctx.moveTo(x - r * 0.5, y); ctx.lineTo(x, y + r);         // קו שמאל תחתון
+        ctx.moveTo(x + r * 0.5, y); ctx.lineTo(x, y + r);         // קו ימין תחתון
+        ctx.stroke();
+
+        // === מסגרת ===
+        ctx.beginPath();
+        ctx.moveTo(x, y - r); ctx.lineTo(x + r, y);
+        ctx.lineTo(x, y + r); ctx.lineTo(x - r, y);
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // === הברקה (shine) ===
+        ctx.beginPath();
+        ctx.moveTo(x - r * 0.28, y - r * 0.45);
+        ctx.lineTo(x + r * 0.08, y - r * 0.72);
+        ctx.lineTo(x - r * 0.04, y - r * 0.22);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,255,255,0.72)';
+        ctx.fill();
+
+        // === כוכבי נצנוץ מסתובבים ===
+        for (let i = 0; i < 3; i++) {
+            const ang  = t * 1.1 + (i * Math.PI * 2 / 3);
+            const dist = r * 1.45;
+            const sx   = x + Math.cos(ang) * dist;
+            const sy   = y + Math.sin(ang) * dist;
+            const ss   = 2.5 + 1.5 * Math.abs(Math.sin(t * 2.5 + i * 1.3));
+            const alpha = 0.55 + 0.45 * Math.abs(Math.sin(t * 3 + i));
+            ctx.save();
+            ctx.translate(sx, sy);
+            ctx.rotate(ang + t * 2);
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(0, -ss); ctx.lineTo(ss * 0.22, 0);
+            ctx.lineTo(0,  ss); ctx.lineTo(-ss * 0.22, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // === טבעת "מסומן" ===
+        if (this.marked) {
+            ctx.strokeStyle = '#FF6D00';
+            ctx.lineWidth = 2.5;
+            ctx.globalAlpha = 0.85;
+            ctx.beginPath();
+            ctx.moveTo(x,         y - r - 5);
+            ctx.lineTo(x + r + 5, y        );
+            ctx.lineTo(x,         y + r + 5);
+            ctx.lineTo(x - r - 5, y        );
+            ctx.closePath();
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        // === הבהוב לבן בפגיעה ===
+        if (this.flashTimer > 0) {
+            ctx.globalAlpha = (this.flashTimer / 0.13) * 0.72;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(x, y - r); ctx.lineTo(x + r, y);
+            ctx.lineTo(x, y + r); ctx.lineTo(x - r, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // === טקסט כמות חיים ===
+        const hpStr    = this.hp >= 1000 ? (this.hp / 1000).toFixed(1) + 'k' : String(this.hp);
+        const fontSize = Math.max(10, Math.min(20, r * 0.58));
+        ctx.font         = `bold ${fontSize}px Arial`;
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle    = 'rgba(0,0,0,0.55)';
+        ctx.fillText(hpStr, x + 1, y + 1);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(hpStr, x, y);
+
+        // === טבעת ספירה לאחור ===
+        const ringColor = timerFrac > 0.5 ? '#00ff88' : timerFrac > 0.25 ? '#ffcc00' : '#ff3300';
+        ctx.strokeStyle = ringColor;
+        ctx.lineWidth   = 3.5;
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.arc(x, y, r + 7, -Math.PI / 2, -Math.PI / 2 + timerFrac * Math.PI * 2);
+        ctx.stroke();
+
+        // === מספר שניות שנותרו ===
+        const secsLeft = Math.ceil(Math.max(0, this.lifeTimer));
+        const numSize  = Math.max(8, Math.floor(r * 0.48));
+        ctx.font         = `bold ${numSize}px Arial`;
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle    = ringColor;
+        ctx.fillText(secsLeft, x, y - r - 4);
     }
 
     _darken(hex, amt) {

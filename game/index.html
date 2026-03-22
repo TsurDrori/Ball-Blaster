@@ -23,6 +23,11 @@
             </div>
         </div>
 
+        <div id="shop-tabs">
+            <button class="shop-tab active" id="tab-upgrades" onclick="switchShopTab('upgrades')">⚡ שדרוגים</button>
+            <button class="shop-tab" id="tab-skins" onclick="switchShopTab('skins')">🎨 סקינים</button>
+        </div>
+
         <div id="upgrade-shop">
             <div class="shop-heading">🛒 שדרוגים</div>
             <div id="upgrade-grid">
@@ -44,11 +49,27 @@
             </div>
         </div>
 
+        <div id="skins-shop" style="display:none">
+            <div id="skin-subtabs">
+                <button class="skin-subtab active" id="stab-cannon" onclick="switchSkinSubtab('cannon')">🔫 תותח</button>
+                <button class="skin-subtab" id="stab-bullet" onclick="switchSkinSubtab('bullet')">🔵 כדורים</button>
+            </div>
+            <div id="skin-grid-cannon" class="skin-grid"></div>
+            <div id="skin-grid-bullet" class="skin-grid" style="display:none"></div>
+            <div id="combo-section" style="display:none">
+                <div class="combo-section-heading">⚡ קומבואים</div>
+                <div id="combo-grid" class="skin-grid"></div>
+            </div>
+        </div>
+
         <button id="start-btn" onclick="startGame()">▶ התחל משחק</button>
 
         <div id="dev-panel">
             <button id="dev-toggle" onclick="toggleDevMode()">🔧 מצב פיתוח: כבוי</button>
             <div id="dev-content">
+                <div class="dev-row">
+                    <button class="dev-reset-btn" onclick="devResetUpgrades()">🗑️ אפס שדרוגים</button>
+                </div>
                 <div class="dev-row">
                     <label for="dev-wave">גל התחלה</label>
                     <input type="number" id="dev-wave" value="1" min="1" max="999" oninput="onDevWaveInput()">
@@ -70,10 +91,19 @@
         <div id="canvas-wrapper">
             <canvas id="bgCanvas"   width="480" height="800"></canvas>
             <canvas id="gameCanvas" width="480" height="800"></canvas>
+            <button id="pause-btn" onclick="togglePause()" title="השהה">⏸</button>
+            <div id="pause-overlay" style="display:none">
+                <div id="pause-menu">
+                    <div class="pause-title">⏸ השהיה</div>
+                    <button class="pause-menu-btn" onclick="togglePause()">▶ המשך</button>
+                    <button class="pause-menu-btn pause-exit-btn" onclick="exitToHome()">🏠 צא למסך הבית</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Load order matters: constants first, then classes, then main loop -->
+    <script src="skins.js"></script>
     <script src="webgl-background.js"></script>
     <script src="background.js"></script>
     <script src="sound.js"></script>

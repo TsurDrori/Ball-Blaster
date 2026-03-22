@@ -10,6 +10,7 @@ class Bullet {
         this.dead   = false;
         this.pierceCount = 0;  // times this bullet has pierced through an enemy
         this.bounced     = false; // for 'bouncy' run upgrade (only bounces once)
+        this.skin        = null;  // visual skin id (set by cannon)
     }
 
     update(delta) {
@@ -35,8 +36,15 @@ class Bullet {
     }
 
     draw(ctx) {
-        ctx.save();
         const isFire = this.type === 'fire';
+        if (!isFire) {
+            const skinId = this.skin ?? (gameState.skins?.activeBullet || 'default');
+            if (skinId !== 'default') {
+                drawBulletSkin(ctx, this, skinId);
+                return;
+            }
+        }
+        ctx.save();
 
         // Glow
         const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2.6);

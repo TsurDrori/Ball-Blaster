@@ -32,6 +32,17 @@ class UI {
         ctx.textBaseline = 'middle';
         ctx.fillText(coins.toLocaleString(), 34, 24);
 
+        // Diamond icon + count (session)
+        const diamonds = gameState.sessionDiamonds || 0;
+        if (diamonds > 0 || gameState.wave >= 11) {
+            ctx.font         = '16px Arial';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('💎', 34 + ctx.measureText(coins.toLocaleString()).width + 10, 24);
+            ctx.fillStyle = '#00e5ff';
+            ctx.font      = 'bold 16px Arial';
+            ctx.fillText(diamonds, 34 + ctx.measureText(coins.toLocaleString()).width + 30, 24);
+        }
+
         // Wave
         ctx.fillStyle    = 'white';
         ctx.font         = 'bold 20px Arial';
