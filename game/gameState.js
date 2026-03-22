@@ -38,6 +38,7 @@ const gameState = {
     currentLives: 1,
     shieldTimer: 0,
     fireTimer: 0,
+    iceTimer: 0,
     runUpgrades: [], // roguelite upgrades chosen during a run (reset each run)
 
     // ── יהלומים (מטבע פרמיום, נשמר) ─────────────────────────────────────
@@ -108,6 +109,7 @@ const gameState = {
         this.currentLives    = this.upgrades.lives;
         this.shieldTimer     = 0;
         this.fireTimer       = 0;
+        this.iceTimer        = 0;
         this.runUpgrades     = [];
     },
 
@@ -152,8 +154,11 @@ const gameState = {
     },
 
     checkWaveMission(wave) {
-        if (wave >= 25) return this._unlockMissionSkin('reach_wave_25');
-        return false;
+        let changed = false;
+        if (wave >= 15) changed = this._unlockMissionSkin('reach_wave_15') || changed;
+        if (wave >= 20) changed = this._unlockMissionSkin('reach_wave_20') || changed;
+        if (wave >= 25) changed = this._unlockMissionSkin('reach_wave_25') || changed;
+        return changed;
     },
 
     checkFirerateMission() {
@@ -165,6 +170,7 @@ const gameState = {
         const total = (this.skins.unlockedCannon.length - 1)
                     + (this.skins.unlockedBullet.length - 1);
         if (total >= 4) this._unlockMissionSkin('buy_4_skins');
+        if (total >= 5) this._unlockMissionSkin('buy_5_skins');
     },
 
     recordDayPlayed() {

@@ -47,8 +47,9 @@ class EnemyBall {
         }
 
         this.flashTimer = 0;
-        this.marked     = false; // for 'marked' run upgrade
+        this.marked     = false; // for 'marked' run upgrade (legacy, kept for draw compat)
         this.markTimer  = 0;
+        this.slowTimer  = 0;    // for 'freeze' run upgrade
 
         this._updateColor();
     }
@@ -116,9 +117,10 @@ class EnemyBall {
             this.markTimer = Math.max(0, this.markTimer - delta);
             if (this.markTimer <= 0) this.marked = false;
         }
+        if (this.slowTimer  > 0) this.slowTimer = Math.max(0, this.slowTimer - delta);
 
-        // יהלום: ספירה לאחור - אם לא נשבר בזמן, נעלם ללא זהב
-        if (this.type === 'crystal') {
+        // יהלום: ספירה לאחור - אם לא נשבר בזמן, נעלם ללא זהב (קפאון עוצר את הטיימר)
+        if (this.type === 'crystal' && gameState.iceTimer <= 0) {
             this.lifeTimer -= delta;
             if (this.lifeTimer <= 0) {
                 this.dead    = true;
@@ -127,9 +129,13 @@ class EnemyBall {
             }
         }
 
+        // Ice power-up freezes all enemies completely
+        if (gameState.iceTimer > 0) return;
+
+        const speedMult = this.slowTimer > 0 ? 0.3 : 1.0;
         this.vy += GRAVITY * delta;
-        this.x  += this.vx * delta;
-        this.y  += this.vy * delta;
+        this.x  += this.vx * delta * speedMult;
+        this.y  += this.vy * delta * speedMult;
 
         // Bounce off side walls
         if (this.x - this.radius < 0) {
@@ -208,6 +214,28 @@ class EnemyBall {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius + 3, 0, Math.PI * 2);
             ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        // Ice power-up: strong frozen overlay
+        if (gameState.iceTimer > 0) {
+            ctx.globalAlpha = 0.55;
+            ctx.fillStyle   = '#cceeff';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 0.9;
+            ctx.strokeStyle = '#aaf0ff';
+            ctx.lineWidth   = 2.5;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        } else if (this.slowTimer > 0) {
+            // Freeze run upgrade: lighter blue tint
+            ctx.globalAlpha = 0.35;
+            ctx.fillStyle   = '#80d8ff';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
             ctx.globalAlpha = 1;
         }
 

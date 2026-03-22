@@ -340,8 +340,8 @@ function fxShieldBreak(x, y) {
 
 // Powerup collected — burst + floating label
 function fxPowerUpCollect(x, y, type) {
-    const colorMap = { shield: '#00aaff', fire: '#ff6600', heart: '#ff2266' };
-    const labelMap = { shield: '🛡️ הגנה!', fire: '🔥 אש!', heart: '❤️ +חיים!' };
+    const colorMap = { shield: '#00aaff', fire: '#ff6600', heart: '#ff2266', ice: '#aaf0ff' };
+    const labelMap = { shield: '🛡️ הגנה!', fire: '🔥 אש!', heart: '❤️ +חיים!', ice: '🧊 הכל קפוא!' };
     const color    = colorMap[type] || '#ffffff';
     for (let i = 0; i < 22; i++) {
         _spawnP(x, y, {

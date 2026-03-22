@@ -544,6 +544,8 @@ function checkCollisions() {
                 // 'double_heart' run upgrade gives 2 lives per heart pickup
                 const gain = gameState.hasRunUpgrade('double_heart') ? 2 : 1;
                 gameState.currentLives = Math.min(gameState.upgrades.lives + 2, gameState.currentLives + gain);
+            } else if (p.type === 'ice') {
+                gameState.iceTimer = 3;
             }
             fxPowerUpCollect(p.x, p.y, p.type);
             sound.upgrade();
@@ -636,6 +638,7 @@ function update(delta) {
     // Tick active powerup timers
     if (gameState.shieldTimer > 0) gameState.shieldTimer = Math.max(0, gameState.shieldTimer - delta);
     if (gameState.fireTimer   > 0) gameState.fireTimer   = Math.max(0, gameState.fireTimer   - delta);
+    if (gameState.iceTimer    > 0) gameState.iceTimer    = Math.max(0, gameState.iceTimer    - delta);
 
     for (const e of enemies) {
         if (e.dead) continue;
@@ -681,7 +684,7 @@ function update(delta) {
     powerupSpawnTimer -= delta;
     if (powerupSpawnTimer <= 0) {
         const roll = Math.random();
-        const type = roll < 0.35 ? 'shield' : roll < 0.7 ? 'fire' : 'heart';
+        const type = roll < 0.28 ? 'shield' : roll < 0.56 ? 'fire' : roll < 0.78 ? 'heart' : 'ice';
         powerups.push(new PowerUp(60 + Math.random() * (CANVAS_W - 120), type));
         powerupSpawnTimer = 15 + Math.random() * 15;
     }

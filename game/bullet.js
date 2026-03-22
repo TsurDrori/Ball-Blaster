@@ -10,6 +10,7 @@ class Bullet {
         this.dead   = false;
         this.pierceCount = 0;  // times this bullet has pierced through an enemy
         this.bounced     = false; // for 'bouncy' run upgrade (only bounces once)
+        this.homing      = false; // for 'homing' run upgrade
         this.skin        = null;  // visual skin id (set by cannon)
     }
 
@@ -36,8 +37,9 @@ class Bullet {
     }
 
     draw(ctx) {
-        const isFire = this.type === 'fire';
-        if (!isFire) {
+        const isFire   = this.type === 'fire';
+        const isHoming = this.homing;
+        if (!isFire && !isHoming) {
             const skinId = this.skin ?? (gameState.skins?.activeBullet || 'default');
             if (skinId !== 'default') {
                 drawBulletSkin(ctx, this, skinId);
@@ -51,6 +53,9 @@ class Bullet {
         if (isFire) {
             glow.addColorStop(0, 'rgba(255,120,0,0.7)');
             glow.addColorStop(1, 'rgba(255,30,0,0)');
+        } else if (isHoming) {
+            glow.addColorStop(0, 'rgba(160,80,255,0.75)');
+            glow.addColorStop(1, 'rgba(80,0,200,0)');
         } else {
             glow.addColorStop(0, 'rgba(255,255,180,0.6)');
             glow.addColorStop(1, 'rgba(255,200,0,0)');
@@ -70,6 +75,11 @@ class Bullet {
             core.addColorStop(0.3, '#ffdd00');
             core.addColorStop(0.7, '#ff4400');
             core.addColorStop(1,   '#cc0000');
+        } else if (isHoming) {
+            core.addColorStop(0,   '#ffffff');
+            core.addColorStop(0.3, '#dd99ff');
+            core.addColorStop(0.7, '#8800ff');
+            core.addColorStop(1,   '#4400aa');
         } else {
             core.addColorStop(0,   '#ffffff');
             core.addColorStop(0.4, '#ffff00');

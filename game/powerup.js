@@ -3,7 +3,7 @@ class PowerUp {
         this.x      = x;
         this.y      = -20;
         this.vy     = 100 + Math.random() * 50;
-        this.type   = type; // 'shield' | 'fire' | 'heart'
+        this.type   = type; // 'shield' | 'fire' | 'heart' | 'ice'
         this.radius = 16;
         this.dead   = false;
         this.age    = 0;
@@ -22,9 +22,10 @@ class PowerUp {
 
         // Outer glow
         const glowPalette = {
-            shield: ['rgba(0,180,255,0.45)', 'rgba(0,100,255,0)'],
-            fire:   ['rgba(255,140,0,0.45)',  'rgba(255,50,0,0)'],
-            heart:  ['rgba(255,60,120,0.45)', 'rgba(220,0,80,0)'],
+            shield: ['rgba(0,180,255,0.45)',   'rgba(0,100,255,0)'],
+            fire:   ['rgba(255,140,0,0.45)',    'rgba(255,50,0,0)'],
+            heart:  ['rgba(255,60,120,0.45)',   'rgba(220,0,80,0)'],
+            ice:    ['rgba(180,240,255,0.55)',  'rgba(0,200,255,0)'],
         };
         const [g1, g2] = glowPalette[this.type];
         const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 2.6);
@@ -36,8 +37,8 @@ class PowerUp {
         ctx.fill();
 
         // Circle body
-        const bgColors     = { shield: '#001840', fire: '#3a0e00', heart: '#380018' };
-        const borderColors = { shield: '#00aaff', fire: '#ff6600', heart: '#ff2266' };
+        const bgColors     = { shield: '#001840', fire: '#3a0e00', heart: '#380018', ice: '#001830' };
+        const borderColors = { shield: '#00aaff', fire: '#ff6600', heart: '#ff2266', ice: '#aaf0ff' };
         ctx.fillStyle   = bgColors[this.type];
         ctx.strokeStyle = borderColors[this.type];
         ctx.lineWidth   = 2.5;
@@ -47,7 +48,7 @@ class PowerUp {
         ctx.stroke();
 
         // Icon
-        const icons = { shield: '🛡️', fire: '🔥', heart: '❤️' };
+        const icons = { shield: '🛡️', fire: '🔥', heart: '❤️', ice: '🧊' };
         ctx.font         = `${Math.floor(r * 1.3)}px Arial`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';

@@ -68,12 +68,14 @@ class UI {
         // Active powerup timer bars
         const shieldT = gameState.shieldTimer || 0;
         const fireT   = gameState.fireTimer   || 0;
-        if (shieldT > 0 || fireT > 0) {
+        const iceT    = gameState.iceTimer    || 0;
+        if (shieldT > 0 || fireT > 0 || iceT > 0) {
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillRect(0, 48, CANVAS_W, 20);
             let bx = 8;
             if (shieldT > 0) { this._drawPowerBar(ctx, bx, 58, shieldT, 8,  '🛡️', '#00aaff'); bx += 158; }
-            if (fireT   > 0) { this._drawPowerBar(ctx, bx, 58, fireT,   10, '🔥', '#ff6600'); }
+            if (fireT   > 0) { this._drawPowerBar(ctx, bx, 58, fireT,   10, '🔥', '#ff6600'); bx += 158; }
+            if (iceT    > 0) { this._drawPowerBar(ctx, bx, 58, iceT,    3,  '🧊', '#aaf0ff'); }
         }
 
         // Active run upgrades strip (small icons below powerup bars)
@@ -81,9 +83,10 @@ class UI {
         if (runUps.length > 0) {
             const RUN_ICONS = {
                 magnetic: '🧲', gold_rush: '💰', bouncy: '🎱', rapid: '⚡',
-                pierce: '🏹', shield_up: '🛡️', double_heart: '💝', marked: '🎯',
+                pierce: '🏹', shield_up: '🛡️', double_heart: '💝',
+                homing: '🚀', explosion: '💥', freeze: '❄️', heal: '💚',
             };
-            const barY = (shieldT > 0 || fireT > 0) ? 72 : 50;
+            const barY = (shieldT > 0 || fireT > 0 || iceT > 0) ? 72 : 50;
             ctx.fillStyle = 'rgba(0,0,0,0.4)';
             ctx.fillRect(0, barY, CANVAS_W, 18);
             ctx.font         = '13px Arial';
