@@ -122,6 +122,13 @@ canvas.addEventListener('click', e => {
 });
 
 // ── Dev mode ─────────────────────────────
+function devResetUpgrades() {
+    if (!devMode) return;
+    gameState.upgrades = { fireRate: 1, damage: 1, multiShot: 1, ballSize: 1, lives: 1 };
+    gameState._save();
+    refreshHomeScreen();
+}
+
 let devMode     = false;
 let devSnapshot = null;
 
