@@ -135,23 +135,6 @@ const gameState = {
         return true;
     },
 
-    buyCombo(id) {
-        const item = COMBO_ITEMS.find(c => c.id === id);
-        if (!item || this.skins.purchasedCombos.includes(id)) return false;
-        if (!this.hasSkinUnlocked(item.requiresCannon, 'cannon')) return false;
-        if (!this.hasSkinUnlocked(item.requiresBullet, 'bullet')) return false;
-        if (this.totalCoins < item.price) return false;
-        this.totalCoins -= item.price;
-        this.skins.purchasedCombos.push(id);
-        this._save();
-        this._checkBuySkinsMission();
-        return true;
-    },
-
-    hasCombo(id) {
-        return this.skins.purchasedCombos.includes(id);
-    },
-
     _unlockMissionSkin(missionId) {
         let changed = false;
         for (const skin of CANNON_SKINS) {
@@ -180,8 +163,7 @@ const gameState = {
 
     _checkBuySkinsMission() {
         const total = (this.skins.unlockedCannon.length - 1)
-                    + (this.skins.unlockedBullet.length - 1)
-                    + (this.skins.purchasedCombos.length);
+                    + (this.skins.unlockedBullet.length - 1);
         if (total >= 4) this._unlockMissionSkin('buy_4_skins');
     },
 

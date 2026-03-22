@@ -16,8 +16,9 @@ let hitInvulnerable   = 0;
 let powerupSpawnTimer = 0;
 
 // ── Combo chain ───────────────────────────
-let comboCount = 0; // kills in current chain
-let comboTimer = 0; // seconds until chain resets
+let comboCount    = 0; // kills in current chain
+let comboTimer    = 0; // seconds until chain resets
+let healKillCount = 0; // kills toward next heal-on-kill
 
 // ── Run upgrade picker ────────────────────
 let upgradePickOptions = []; // empty = no picker; 3 items = show picker
@@ -30,7 +31,10 @@ const RUN_UPGRADE_POOL = [
     { id: 'pierce',       icon: '🏹', name: 'כדורים חודרים', desc: 'כל כדור חודר אויב נוסף' },
     { id: 'shield_up',    icon: '🛡️', name: 'מגן חזק',       desc: 'מגן נמשך 20 שניות' },
     { id: 'double_heart', icon: '💝', name: 'לב כפול',        desc: 'פיק לב נותן 2 חיים' },
-    { id: 'marked',       icon: '🎯', name: 'אויב מסומן',    desc: 'פגיעה ראשונה: נזק כפול ל-3 שניות' },
+    { id: 'homing',       icon: '🚀', name: 'טיל מונחה',     desc: 'כדור אחד בכל יריה עף לאויב הקרוב' },
+    { id: 'explosion',    icon: '💥', name: 'פיצוץ בפגיעה',  desc: 'כל פגיעה מזיקה לאויבים קרובים' },
+    { id: 'freeze',       icon: '❄️', name: 'קפאון',          desc: 'כדורים מאטים אויבים ל-2 שניות' },
+    { id: 'heal',         icon: '💚', name: 'ריפוי בהריגה',  desc: 'כל 10 הריגות נותנות חיים' },
 ];
 
 function pickUpgradeOptions(n) {
@@ -236,14 +240,13 @@ function switchShopTab(tab) {
 function switchSkinSubtab(type) {
     const gc = document.getElementById('skin-grid-cannon');
     const gb = document.getElementById('skin-grid-bullet');
-    const cs = document.getElementById('combo-section');
     const tc = document.getElementById('stab-cannon');
     const tb = document.getElementById('stab-bullet');
     if (type === 'cannon') {
-        gc.style.display = ''; gb.style.display = 'none'; cs.style.display = 'none';
+        gc.style.display = ''; gb.style.display = 'none';
         tc.classList.add('active'); tb.classList.remove('active');
     } else {
-        gc.style.display = 'none'; gb.style.display = ''; cs.style.display = '';
+        gc.style.display = 'none'; gb.style.display = '';
         tc.classList.remove('active'); tb.classList.add('active');
     }
 }
@@ -251,7 +254,6 @@ function switchSkinSubtab(type) {
 function refreshSkinsPanel() {
     _renderSkinGrid('cannon', CANNON_SKINS, 'skin-grid-cannon');
     _renderSkinGrid('bullet', BULLET_SKINS, 'skin-grid-bullet');
-    _renderComboGrid('combo-grid');
 }
 
 function _renderSkinGrid(type, catalog, gridId) {
@@ -264,12 +266,6 @@ function _renderSkinGrid(type, catalog, gridId) {
         const isEquipped = activeId === skin.id;
         const canAfford  = skin.price > 0 && gameState.totalCoins >= skin.price;
         const statusClass = isEquipped ? 'equipped' : isUnlocked ? 'unlocked' : 'locked';
-
-        const sausageActive = gameState.skins.activeCannon === 'pan'
-            && gameState.skins.activeBullet === 'egg'
-            && gameState.hasCombo('sausage_combo');
-        const showCombo = sausageActive &&
-            ((type === 'cannon' && skin.id === 'pan') || (type === 'bullet' && skin.id === 'egg'));
 
         let priceText;
         if (skin.price > 0)       priceText = `🪙 ${skin.price.toLocaleString()}`;
@@ -289,7 +285,7 @@ function _renderSkinGrid(type, catalog, gridId) {
             btn = `<div class="skin-card-btn btn-locked">🪙 ${skin.price.toLocaleString()}</div>`;
         }
 
-        return `<div class="skin-card ${statusClass}${showCombo ? ' combo-active' : ''}">
+        return `<div class="skin-card ${statusClass}">
             <div class="skin-card-emoji">${skin.emoji}</div>
             <div class="skin-card-name">${skin.name}</div>
             <div class="skin-card-price">${priceText}</div>
@@ -313,53 +309,6 @@ function equipSkin(id, type) {
         sound.upgrade();
         refreshSkinsPanel();
     }
-}
-
-function buyCombo(id) {
-    sound.unlock();
-    if (gameState.buyCombo(id)) {
-        sound.upgrade();
-        refreshSkinsPanel();
-        refreshHomeScreen();
-    }
-}
-
-function _renderComboGrid(gridId) {
-    const grid = document.getElementById(gridId);
-    if (!grid) return;
-
-    grid.innerHTML = COMBO_ITEMS.map(item => {
-        const isPurchased = gameState.hasCombo(item.id);
-        const hasReqs     = gameState.hasSkinUnlocked(item.requiresCannon, 'cannon')
-                         && gameState.hasSkinUnlocked(item.requiresBullet, 'bullet');
-        const canAfford   = gameState.totalCoins >= item.price;
-        const isActive    = isPurchased
-                         && gameState.skins.activeCannon === item.requiresCannon
-                         && gameState.skins.activeBullet === item.requiresBullet;
-
-        let statusClass, btn;
-        if (isPurchased) {
-            statusClass = isActive ? 'equipped' : 'unlocked';
-            btn = `<div class="skin-card-btn btn-equipped">${isActive ? '✓ פעיל!' : '✓ נקנה'}</div>`;
-        } else if (!hasReqs) {
-            statusClass = 'locked';
-            btn = `<div class="skin-card-btn btn-locked">🔒 צריך מחבת + ביצה</div>`;
-        } else if (canAfford) {
-            statusClass = '';
-            btn = `<button class="skin-card-btn btn-buy" onclick="buyCombo('${item.id}')">🪙 קנה</button>`;
-        } else {
-            statusClass = '';
-            btn = `<div class="skin-card-btn btn-locked">🪙 ${item.price.toLocaleString()}</div>`;
-        }
-
-        const reqText = `מחבת + ביצה`;
-        return `<div class="skin-card combo-card ${statusClass}">
-            <div class="skin-card-emoji">${item.emoji}</div>
-            <div class="skin-card-name">${item.name}</div>
-            <div class="skin-card-price combo-req">${isPurchased ? (isActive ? '🔥 פעיל!' : reqText) : `🪙 ${item.price} · דרוש: ${reqText}`}</div>
-            ${btn}
-        </div>`;
-    }).join('');
 }
 
 function refreshHomeScreen() {
@@ -451,6 +400,7 @@ function initEntities() {
     powerupSpawnTimer = 20 + Math.random() * 10;
     comboCount        = 0;
     comboTimer        = 0;
+    healKillCount     = 0;
     upgradePickOptions = [];
     resetEffects();
     Object.keys(keys).forEach(k => { keys[k] = false; });
@@ -474,20 +424,26 @@ function checkCollisions() {
             if (e.dead) continue;
             const minD = b.radius + e.radius;
             if (dist2(b.x, b.y, e.x, e.y) < minD * minD) {
-                // Calculate damage (with 'marked' run upgrade)
-                let dmg = b.damage;
-                if (gameState.hasRunUpgrade('marked') && b.type !== 'fire') {
-                    if (e.marked) {
-                        dmg *= 2;
-                        e.marked    = false;
-                        e.markTimer = 0;
-                    } else {
-                        e.marked    = true;
-                        e.markTimer = 3.0;
-                    }
+                const dmg = b.damage;
+                e.hit(dmg);
+
+                // Freeze: bullets slow enemy movement
+                if (gameState.hasRunUpgrade('freeze')) {
+                    e.slowTimer = 2.0;
                 }
 
-                e.hit(dmg);
+                // Explosion splash: deal half damage to nearby enemies
+                if (gameState.hasRunUpgrade('explosion')) {
+                    const splashDmg = Math.max(1, Math.ceil(dmg * 0.5));
+                    for (const ne of enemies) {
+                        if (ne.dead || ne === e) continue;
+                        if (dist2(b.x, b.y, ne.x, ne.y) < 80 * 80) {
+                            ne.hit(splashDmg);
+                            fxHit(ne.x, ne.y, ne.baseColor, splashDmg);
+                        }
+                    }
+                    shockwaves.push(new Shockwave(b.x, b.y, 'rgba(255,140,0,0.7)', 80, 220));
+                }
 
                 // Bullet pierce logic (fire bullets always pierce)
                 if (b.type !== 'fire') {
@@ -532,6 +488,19 @@ function checkCollisions() {
 
                     spawnCoins(e, mult);
                     sound.explode();
+
+                    // Heal on kill: every 10 kills gain 1 life
+                    if (gameState.hasRunUpgrade('heal')) {
+                        healKillCount++;
+                        if (healKillCount >= 10) {
+                            healKillCount = 0;
+                            const maxLives = gameState.upgrades.lives + 2;
+                            if (gameState.currentLives < maxLives) {
+                                gameState.currentLives++;
+                                floatingTexts.push(new FloatingText(cannon.x, cannon.y - 50, '💚 +חיים!', '#00e676', 24));
+                            }
+                        }
+                    }
                 } else {
                     fxHit(b.x, b.y, e.baseColor, dmg);
                     sound.hit();
@@ -632,6 +601,29 @@ function update(delta) {
     }
 
     for (const b of bullets) b.update(delta);
+
+    // Homing missile steering
+    if (gameState.hasRunUpgrade('homing')) {
+        for (const b of bullets) {
+            if (!b.homing || b.dead) continue;
+            let nearest = null, bestDist = Infinity;
+            for (const e of enemies) {
+                if (e.dead) continue;
+                const d = dist2(b.x, b.y, e.x, e.y);
+                if (d < bestDist) { bestDist = d; nearest = e; }
+            }
+            if (nearest) {
+                const dx = nearest.x - b.x;
+                const dy = nearest.y - b.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                if (len > 0) {
+                    const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+                    b.vx += (dx / len * speed - b.vx) * 4.0 * delta;
+                    b.vy += (dy / len * speed - b.vy) * 4.0 * delta;
+                }
+            }
+        }
+    }
 
     // Combo chain timer
     if (comboTimer > 0) {

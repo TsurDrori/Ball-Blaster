@@ -5,7 +5,6 @@ const CANNON_SKINS = [
     { id: 'gold',    name: 'תותח זהב',   emoji: '✨',  price: 500,  mission: null },
     { id: 'diamond', name: 'תותח יהלום', emoji: '💎',  price: 900,  mission: null },
     { id: 'rocket',  name: 'רקטן',       emoji: '🚀',  price: 1400, mission: null },
-    { id: 'pan',     name: 'מחבת',       emoji: '🍳',  price: 0,    mission: { id: 'reach_wave_25', text: 'הגע לגל 25' } },
     { id: 'rainbow', name: 'קשת בענן',   emoji: '🌈',  price: 0,    mission: { id: 'buy_4_skins',   text: 'קנה 4 סקינים' } },
 ];
 
@@ -13,22 +12,8 @@ const BULLET_SKINS = [
     { id: 'default', name: 'כדורים רגילים', emoji: '🔵', price: 0,   mission: null },
     { id: 'purple',  name: 'סגולים',        emoji: '💜', price: 350, mission: null },
     { id: 'star',    name: 'כוכבים',        emoji: '⭐', price: 650, mission: null },
-    { id: 'egg',     name: 'ביצת עין',      emoji: '🥚', price: 600, mission: null },
     { id: 'ice',     name: 'קרח',           emoji: '❄️', price: 850, mission: null },
     { id: 'ruby',    name: 'יהלומי אודם',   emoji: '🔴', price: 0,   mission: { id: 'firerate_lv4', text: 'שדרג קצב ירי לרמה 4' } },
-];
-
-// Combo items — special upgrades that require specific cannon + bullet skins
-const COMBO_ITEMS = [
-    {
-        id: 'sausage_combo',
-        name: 'קומבו נקניק',
-        emoji: '🌭',
-        price: 800,
-        requiresCannon: 'pan',
-        requiresBullet: 'egg',
-        desc: 'מחבת + ביצה → כל 8 כדורים יוצא נקניק (נזק ×2.5)',
-    },
 ];
 
 // ─── Helper: draw N-point star ────────────────────────────────────────────────
@@ -94,7 +79,6 @@ function drawCannonSkin(ctx, cannon, skinId) {
         case 'gold':    _drawGoldCannon(ctx, cannon);    break;
         case 'diamond': _drawDiamondCannon(ctx, cannon); break;
         case 'rocket':  _drawRocketCannon(ctx, cannon);  break;
-        case 'pan':     _drawPanCannon(ctx, cannon);     break;
         case 'rainbow': _drawRainbowCannon(ctx, cannon); break;
     }
 }
@@ -268,54 +252,6 @@ function _drawRocketCannon(ctx, c) {
     ctx.restore();
 }
 
-function _drawPanCannon(ctx, c) {
-    ctx.save();
-    const { x, y } = c;
-    const t = performance.now() * 0.001;
-
-    _skinShield(ctx, c);
-
-    // Handle
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#3a2010'; ctx.lineWidth = 10;
-    ctx.beginPath(); ctx.moveTo(x + 10, y + 14); ctx.lineTo(x + 52, y + 28); ctx.stroke();
-    ctx.strokeStyle = '#7a4828'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(x + 10, y + 12); ctx.lineTo(x + 50, y + 26); ctx.stroke();
-
-    // Pan body
-    const panR = 34;
-    const pg = ctx.createRadialGradient(x - 6, y - 8, 3, x, y, panR);
-    pg.addColorStop(0, '#484848'); pg.addColorStop(0.6, '#1a1a1a'); pg.addColorStop(1, '#080808');
-    ctx.fillStyle = pg;
-    ctx.beginPath(); ctx.arc(x, y, panR, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#303030'; ctx.lineWidth = 3; ctx.stroke();
-
-    // Rim highlight
-    ctx.strokeStyle = '#606060'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(x, y, panR - 2, -Math.PI * 0.85, -Math.PI * 0.15); ctx.stroke();
-
-    // Sizzle glow
-    const sa = 0.3 + 0.2 * Math.sin(t * 4);
-    const sg = ctx.createRadialGradient(x, y, 2, x, y, 18);
-    sg.addColorStop(0, `rgba(255,200,50,${sa})`); sg.addColorStop(1, 'rgba(255,100,0,0)');
-    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
-
-    // Steam
-    for (let i = 0; i < 3; i++) {
-        const sx = x - 10 + i * 10;
-        const off = (t * 28 + i * 18) % 28;
-        ctx.strokeStyle = `rgba(255,255,255,${0.12 + 0.08 * Math.sin(t * 2 + i)})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(sx, y - panR - off);
-        ctx.quadraticCurveTo(sx + 5, y - panR - off - 8, sx, y - panR - off - 16);
-        ctx.stroke();
-    }
-
-    _skinHitFlash(ctx, c);
-    ctx.restore();
-}
-
 function _drawRainbowCannon(ctx, c) {
     ctx.save();
     const t   = performance.now() * 0.001;
@@ -373,10 +309,8 @@ function drawBulletSkin(ctx, bullet, skinId) {
     switch (skinId) {
         case 'purple':  _drawPurpleBullet(ctx, bullet);  break;
         case 'star':    _drawStarBullet(ctx, bullet);    break;
-        case 'egg':     _drawEggBullet(ctx, bullet);     break;
         case 'ice':     _drawIceBullet(ctx, bullet);     break;
         case 'ruby':    _drawRubyBullet(ctx, bullet);    break;
-        case 'sausage': _drawSausageBullet(ctx, bullet); break;
     }
 }
 
@@ -403,22 +337,6 @@ function _drawStarBullet(ctx, b) {
     ctx.fillStyle = core;
     _drawStar(ctx, 0, 0, b.radius * 1.25, 5); ctx.fill();
     ctx.restore();
-    ctx.restore();
-}
-
-function _drawEggBullet(ctx, b) {
-    ctx.save();
-    const gl = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius * 2.2);
-    gl.addColorStop(0, 'rgba(255,255,230,0.5)'); gl.addColorStop(1, 'rgba(255,230,150,0)');
-    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius * 2.2, 0, Math.PI * 2); ctx.fill();
-    // Egg white
-    ctx.fillStyle = '#f8f8e8'; ctx.strokeStyle = '#ddd8a0'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.radius * 1.15, b.radius * 0.9, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    // Yolk
-    const yr = b.radius * 0.55;
-    const yg = ctx.createRadialGradient(b.x - yr * 0.3, b.y - yr * 0.3, 0, b.x, b.y, yr);
-    yg.addColorStop(0, '#ffe880'); yg.addColorStop(0.6, '#ffb800'); yg.addColorStop(1, '#dd8000');
-    ctx.fillStyle = yg; ctx.beginPath(); ctx.arc(b.x, b.y, yr, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
 }
 
@@ -461,29 +379,3 @@ function _drawRubyBullet(ctx, b) {
     ctx.restore();
 }
 
-function _drawSausageBullet(ctx, b) {
-    ctx.save();
-    // Glow
-    const gl = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius * 2.5);
-    gl.addColorStop(0, 'rgba(200,80,20,0.5)'); gl.addColorStop(1, 'rgba(150,40,0,0)');
-    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius * 2.5, 0, Math.PI * 2); ctx.fill();
-    // Body
-    const sg = ctx.createLinearGradient(b.x - b.radius, b.y, b.x + b.radius, b.y);
-    sg.addColorStop(0, '#8b3a10'); sg.addColorStop(0.3, '#cc6030'); sg.addColorStop(0.5, '#dd7040'); sg.addColorStop(0.7, '#cc6030'); sg.addColorStop(1, '#8b3a10');
-    ctx.fillStyle = sg;
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.radius * 0.7, b.radius * 1.65, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#6a2008'; ctx.lineWidth = 1.5; ctx.stroke();
-    // Texture lines
-    ctx.strokeStyle = 'rgba(100,30,5,0.45)'; ctx.lineWidth = 1;
-    for (let i = -1; i <= 1; i++) {
-        ctx.beginPath();
-        ctx.moveTo(b.x - b.radius * 0.4, b.y + i * b.radius * 0.55);
-        ctx.lineTo(b.x + b.radius * 0.4, b.y + i * b.radius * 0.55);
-        ctx.stroke();
-    }
-    // Rounded ends
-    ctx.fillStyle = '#7a2a08';
-    ctx.beginPath(); ctx.ellipse(b.x, b.y - b.radius * 1.5, b.radius * 0.5, b.radius * 0.28, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(b.x, b.y + b.radius * 1.5, b.radius * 0.5, b.radius * 0.28, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-}

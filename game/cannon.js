@@ -7,7 +7,6 @@ class Cannon {
         this.fireTimer = 0;
         this.muzzleFlash = 0; // cosmetic flash timer
         this.hitFlash = 0;    // red flash when life lost
-        this.specialShotCounter = 0; // tracks shots for sausage combo
     }
 
     // Persistent upgrade base fire rate, then 'rapid' run upgrade trims 25%
@@ -55,21 +54,9 @@ class Cannon {
         const activeCannon = gameState.skins?.activeCannon || 'default';
         const activeBullet = gameState.skins?.activeBullet || 'default';
 
-        // Sausage combo: pan + egg + purchased combo unlock → every 8th shot is a sausage
-        const isSausageCombo = activeCannon === 'pan' && activeBullet === 'egg'
-            && gameState.hasCombo('sausage_combo');
         let bulletSkin   = activeBullet;
         let damageMult   = 1;
         let radiusMult   = 1;
-
-        if (isSausageCombo) {
-            this.specialShotCounter++;
-            if (this.specialShotCounter % 8 === 0) {
-                bulletSkin  = 'sausage';
-                damageMult  = 2.5;
-                radiusMult  = 1.5;
-            }
-        }
 
         for (let i = 0; i < count; i++) {
             const xOffset = count > 1 ? -totalSpread / 2 + step * i : 0;
@@ -79,6 +66,10 @@ class Cannon {
             const b = new Bullet(this.x + xOffset, this.y - this.h / 2 - 4, 0, -this.bulletSpeed, radius, damage, type);
             b.skin = isFire ? null : bulletSkin; // fire powerup overrides visuals
             result.push(b);
+        }
+        // Mark the middle bullet as homing
+        if (!isFire && gameState.hasRunUpgrade('homing') && result.length > 0) {
+            result[Math.floor(result.length / 2)].homing = true;
         }
         return result;
     }
