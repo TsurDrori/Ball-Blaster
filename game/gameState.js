@@ -121,8 +121,9 @@ const gameState = {
     buySkin(id, type) {
         const catalog = type === 'cannon' ? CANNON_SKINS : BULLET_SKINS;
         const skin = catalog.find(s => s.id === id);
-        if (!skin || this.hasSkinUnlocked(id, type) || skin.mission || this.totalCoins < skin.price) return false;
-        this.totalCoins -= skin.price;
+        if (!skin || this.hasSkinUnlocked(id, type) || skin.mission || this.totalDiamonds < skin.price) return false;
+        this.totalDiamonds -= skin.price;
+        localStorage.setItem('bb_diamonds', this.totalDiamonds);
         (type === 'cannon' ? this.skins.unlockedCannon : this.skins.unlockedBullet).push(id);
         this._save();
         this._checkBuySkinsMission();

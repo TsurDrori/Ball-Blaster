@@ -67,14 +67,14 @@ class WaveManager {
 
     // Choose an enemy type based on wave progression.
     // New types unlock gradually so early waves stay clean.
-    // יהלומים (crystal) מופיעים רק מגל 11 ונדירים (6% בלבד).
+    // יהלומים (crystal) מופיעים רק מגל 11 ונדירים מאוד (1% בלבד).
     _chooseType() {
         if (this.wave < 6) return 'normal';
         const roll = Math.random();
         if (roll < 0.65)                                        return 'normal';
         if (roll < 0.76) return this.wave >= 10 ? 'bomb'      : 'normal';
         if (roll < 0.87) return this.wave >= 15 ? 'splitter'  : 'normal';
-        if (roll < 0.94) return this.wave >= 8  ? 'fast'      : 'normal';
+        if (roll < 0.99) return this.wave >= 8  ? 'fast'      : 'normal';
                          return this.wave >= 11 ? 'crystal'   : 'normal';
     }
 

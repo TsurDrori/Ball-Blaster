@@ -436,6 +436,22 @@ body {
     overflow: hidden;
 }
 
+#dev-panel.dev-open {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(480px, 100%);
+    z-index: 999;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+    box-shadow: 0 -4px 24px rgba(0, 80, 0, 0.4);
+}
+
+#home-screen.dev-panel-open {
+    padding-bottom: 160px;
+}
+
 #dev-toggle {
     width: 100%;
     padding: 8px 14px;

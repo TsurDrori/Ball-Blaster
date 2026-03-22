@@ -174,6 +174,8 @@ function toggleDevMode() {
     btn.textContent = devMode ? '🔧 מצב פיתוח: פעיל' : '🔧 מצב פיתוח: כבוי';
     btn.classList.toggle('dev-on', devMode);
     content.classList.toggle('open', devMode);
+    document.getElementById('dev-panel').classList.toggle('dev-open', devMode);
+    document.getElementById('home-screen').classList.toggle('dev-panel-open', devMode);
     refreshHomeScreen();
 }
 
@@ -264,11 +266,11 @@ function _renderSkinGrid(type, catalog, gridId) {
     grid.innerHTML = catalog.map(skin => {
         const isUnlocked = gameState.hasSkinUnlocked(skin.id, type);
         const isEquipped = activeId === skin.id;
-        const canAfford  = skin.price > 0 && gameState.totalCoins >= skin.price;
+        const canAfford  = skin.price > 0 && gameState.totalDiamonds >= skin.price;
         const statusClass = isEquipped ? 'equipped' : isUnlocked ? 'unlocked' : 'locked';
 
         let priceText;
-        if (skin.price > 0)       priceText = `🪙 ${skin.price.toLocaleString()}`;
+        if (skin.price > 0)       priceText = `💎 ${skin.price.toLocaleString()}`;
         else if (skin.mission)    priceText = skin.mission.text;
         else                      priceText = 'חינם';
 
@@ -280,9 +282,9 @@ function _renderSkinGrid(type, catalog, gridId) {
         } else if (skin.mission) {
             btn = `<div class="skin-card-btn btn-locked">🔒 ${skin.mission.text}</div>`;
         } else if (canAfford) {
-            btn = `<button class="skin-card-btn btn-buy" onclick="buySkin('${skin.id}','${type}')">🪙 קנה</button>`;
+            btn = `<button class="skin-card-btn btn-buy" onclick="buySkin('${skin.id}','${type}')">💎 קנה</button>`;
         } else {
-            btn = `<div class="skin-card-btn btn-locked">🪙 ${skin.price.toLocaleString()}</div>`;
+            btn = `<div class="skin-card-btn btn-locked">💎 ${skin.price.toLocaleString()}</div>`;
         }
 
         return `<div class="skin-card ${statusClass}">
@@ -554,7 +556,7 @@ function checkCollisions() {
 }
 
 function spawnCoins(enemy, comboMult = 1.0) {
-    // אויב יהלום → מוריד 4-7 יהלומים (לא זהב)
+    // אויב יהלום → מוריד 4-7 יהלומים (נדיר!)
     if (enemy.type === 'crystal') {
         const count = 4 + Math.floor(Math.random() * 4); // 4, 5, 6 או 7
         for (let k = 0; k < count; k++) {
