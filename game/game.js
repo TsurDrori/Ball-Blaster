@@ -20,6 +20,13 @@ let comboCount    = 0; // kills in current chain
 let comboTimer    = 0; // seconds until chain resets
 let healKillCount = 0; // kills toward next heal-on-kill
 
+// ── Boss fight ────────────────────────────
+let bossActive      = false;
+let bosses          = []; // BossEnemy[]
+let bossBullets     = []; // BossBullet[]
+let bossAnnounceT   = 0;
+let bossAnnounceTxt = '';
+
 // ── Run upgrade picker ────────────────────
 let upgradePickOptions = []; // empty = no picker; 3 items = show picker
 
@@ -43,7 +50,7 @@ const RUN_UPGRADE_POOL = [
     { id: 'gold_rush',    icon: '💰', name: 'בונוס זהב',     desc: 'ערך כל המטבעות ×1.5' },
     { id: 'bouncy',       icon: '🎱', name: 'כדורים קופצים', desc: 'כדורים מקפיצים מהקירות' },
     { id: 'rapid',        icon: '⚡', name: 'ירי מהיר',       desc: '+25% קצב ירי' },
-    { id: 'pierce',       icon: '🏹', name: 'כדורים חודרים', desc: 'כל כדור חודר אויב נוסף' },
+    { id: 'pierce',       icon: '🏹', name: 'כדורים חודרים', desc: 'כדורים עוברים דרך כל האויבים' },
     { id: 'shield_up',    icon: '🛡️', name: 'מגן חזק',       desc: 'מגן נמשך 20 שניות' },
     { id: 'double_heart', icon: '💝', name: 'לב כפול',        desc: 'פיק לב נותן 2 חיים' },
     { id: 'homing',       icon: '🚀', name: 'טיל מונחה',     desc: 'כדור אחד בכל יריה עף לאויב הקרוב' },
@@ -224,14 +231,27 @@ function onDevWaveInput() {
 function buyUpgrade(type) {
     if (gameState.status !== 'home') return;
     sound.unlock();
+    const prevLevel    = gameState.upgrades[type];
+    const wasPrestige  = type === 'multiShot' && prevLevel > 0 && prevLevel % 5 === 0;
     if (gameState.buyUpgrade(type)) {
         sound.upgrade();
+        if (wasPrestige) _showPrestigeToast(prevLevel);
         if (type === 'fireRate') {
             const unlocked = gameState.checkFirerateMission();
             if (unlocked) refreshSkinsPanel();
         }
         refreshHomeScreen();
     }
+}
+
+function _showPrestigeToast(prevLevel) {
+    const cycle = Math.floor(prevLevel / 5);
+    const mult  = Math.pow(10, cycle);
+    const toast = document.getElementById('prestige-toast');
+    toast.innerHTML = `🔥 פרסטיג'! רב-כדורי<br><span style="font-size:14px;color:#ffaa44">1 כדור = ×${mult} נזק מהמחזור הקודם</span>`;
+    toast.classList.remove('show');
+    void toast.offsetWidth; // force reflow
+    toast.classList.add('show');
 }
 
 // ── Skin shop ─────────────────────────────────────────────────────────────────
@@ -353,11 +373,11 @@ function refreshHomeScreen() {
 
     document.getElementById('hs-wave').textContent = gameState.highScore;
 
-    const MAX_LEVELS = { fireRate: Infinity, damage: 8, multiShot: 5, ballSize: Infinity, lives: Infinity };
+    const MAX_LEVELS = { fireRate: 10, damage: 8, multiShot: 15, ballSize: Infinity, lives: Infinity };
     const meta = {
         fireRate:  { icon: '⚡', name: 'קצב ירי',   desc: lv => `${Math.round(10 / Math.max(0.025, 0.16 - (lv-1)*0.015))/10} כדורים/שנ'` },
         damage:    { icon: '💥', name: 'עוצמה',     desc: lv => `נזק ${Math.min(8, lv)} לכדור` },
-        multiShot: { icon: '🎯', name: 'רב-כדורי',  desc: lv => `${Math.min(5, lv)} כדורים במקביל` },
+        multiShot: { icon: '🎯', name: 'רב-כדורי',  desc: lv => { const cycle = Math.floor((lv-1)/5); const bullets = ((lv-1)%5)+1; return cycle > 0 ? `${bullets} כדורים ×${Math.pow(10,cycle)} נזק` : `${bullets} כדורים במקביל`; } },
         ballSize:  { icon: '🔵', name: 'גודל כדור', desc: lv => `רדיוס ${9 + (lv-1)*2}` },
         lives:     { icon: '❤️', name: 'חיים',       desc: lv => `${lv} חיים למשחק` },
     };
@@ -372,8 +392,17 @@ function refreshHomeScreen() {
             btn.className = 'upgrade-btn max-level';
             btn.disabled  = true;
         } else {
-            btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
-            btn.className = 'upgrade-btn' + (gameState.canAfford(type) ? ' affordable' : '');
+            // פרסטיג' = רמה נוכחית מחולקת ב-5 ללא שארית (5, 10, 15) → הרכישה הבאה מאפסת לכדור 1 ×10 נזק
+            const isPrestige = type === 'multiShot' && lv > 0 && lv % 5 === 0;
+            const canAfford  = gameState.canAfford(type);
+            if (isPrestige) {
+                const nextCycle = Math.floor(lv / 5);
+                const mult = Math.pow(10, nextCycle);
+                btn.innerHTML = `🔥 ${m.name} — פרסטיג'!<br><small>← 1 כדור ×${mult} נזק</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
+            } else {
+                btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
+            }
+            btn.className = 'upgrade-btn' + (canAfford ? ' affordable' : '') + (isPrestige ? ' prestige' : '');
             btn.disabled  = false;
         }
     }
@@ -452,6 +481,11 @@ function initEntities() {
     comboTimer        = 0;
     healKillCount     = 0;
     upgradePickOptions = [];
+    bossActive      = false;
+    bosses          = [];
+    bossBullets     = [];
+    bossAnnounceT   = 0;
+    bossAnnounceTxt = '';
     resetEffects();
     Object.keys(keys).forEach(k => { keys[k] = false; });
 }
@@ -464,7 +498,7 @@ function dist2(ax, ay, bx, by) {
 
 function checkCollisions() {
     const collector = cannon.getCollector();
-    const maxPierce = gameState.hasRunUpgrade('pierce') ? 2 : 1;
+    const maxPierce = gameState.hasRunUpgrade('pierce') ? Infinity : 1;
 
     for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
@@ -746,6 +780,119 @@ function update(delta) {
     updateEffects(delta);
     checkCollisions();
 
+    // ── גל בוס ────────────────────────────────────────────────
+    if (bossActive) {
+        if (bossAnnounceT > 0) bossAnnounceT -= delta;
+
+        // עדכן בוסים — אסוף כדורים ואויבים חדשים
+        for (const b of bosses) {
+            if (b.dead) continue;
+            b.update(delta, cannon.x);
+            bossBullets.push(...b._newBullets);
+            enemies.push(...b._newEnemies);
+        }
+
+        // עדכן כדורי בוס + פגיעה בתותח
+        for (const bb of bossBullets) {
+            bb.update(delta);
+            if (bb.dead || gameState.iceTimer > 0) continue;
+            if (bb.hitsCannon(cannon)) {
+                bb.dead = true;
+                if (gameState.shieldTimer > 0) {
+                    gameState.shieldTimer = 0;
+                    fxShieldBreak(cannon.x, cannon.y);
+                    sound.impact();
+                    screenShake.trigger(0.25, 10);
+                } else if (hitInvulnerable <= 0) {
+                    sound.impact();
+                    gameState.currentLives--;
+                    cannon.hitFlash = 0.5;
+                    screenShake.trigger(0.3, 10);
+                    if (gameState.currentLives <= 0) {
+                        sound.gameOver();
+                        screenShake.trigger(0.6, 18);
+                        gameState.endGame();
+                        returnTimer = 3.0;
+                        return;
+                    }
+                    hitInvulnerable = 1.5;
+                }
+            }
+        }
+        bossBullets = bossBullets.filter(bb => !bb.dead);
+
+        // כדורי שחקן פוגעים בבוס
+        const bossMaxPierce = gameState.hasRunUpgrade('pierce') ? Infinity : 1;
+        for (const b of bullets) {
+            if (b.dead || gameState.iceTimer > 0) continue;
+            for (const boss of bosses) {
+                if (boss.dead) continue;
+                const minD = b.radius + boss.radius;
+                if (dist2(b.x, b.y, boss.x, boss.y) < minD * minD) {
+                    if (boss.type === 'shield' && boss.blocksHit(b.x, b.y)) {
+                        // קשת חסמה — הכדור מת ללא נזק
+                        fxHit(b.x, b.y, '#33ffcc', 0);
+                        if (b.type !== 'fire') { b.pierceCount++; if (b.pierceCount >= bossMaxPierce) b.dead = true; }
+                    } else {
+                        boss.hit(b.damage);
+                        fxHit(b.x, b.y, boss._primary(), b.damage);
+                        if (b.type !== 'fire') { b.pierceCount++; if (b.pierceCount >= bossMaxPierce) b.dead = true; }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // טיפול בבוסים מתים
+        for (let i = bosses.length - 1; i >= 0; i--) {
+            const boss = bosses[i];
+            if (!boss.dead) continue;
+            if (boss.splitting) {
+                // מפצל: מחלק לשני מיני-בוסים
+                const bx = boss.x, by = boss.y;
+                bosses.splice(i, 1);
+                bosses.push(
+                    new BossEnemy(boss.wave, 'splitter', true, bx - 65),
+                    new BossEnemy(boss.wave, 'splitter', true, bx + 65)
+                );
+                fxEnemyDeath(bx, by, '#ffaa00', boss.maxHp * 0.5);
+                screenShake.trigger(0.4, 10);
+                sound.explode();
+                floatingTexts.push(new FloatingText(bx, by - 50, '✂️ מתפצל!', '#ffaa44', 24));
+            } else {
+                // מוות רגיל — מטבעות + אפקטים
+                const bx = boss.x, by = boss.y;
+                bosses.splice(i, 1);
+                fxEnemyDeath(bx, by, boss._primary(), boss.maxHp);
+                sound.explode();
+                const cv = Math.max(5, Math.ceil(Math.sqrt(boss.wave * boss.wave)));
+                for (let k = 0; k < 15; k++) {
+                    coins.push(new Coin(bx + (Math.random() - 0.5) * 80, by + (Math.random() - 0.5) * 30, cv));
+                }
+            }
+        }
+
+        // כל הבוסים הובסו?
+        if (bosses.length === 0) {
+            bossActive  = false;
+            bossBullets = [];
+            upgradePickOptions = pickUpgradeOptions(3);
+            screenShake.trigger(0.8, 20);
+            sound.explode();
+            floatingTexts.push(new FloatingText(CANVAS_W / 2, CANVAS_H * 0.42, '💀 בוס הובס!', '#ffcc00', 34));
+        }
+
+        // ניקוי + דלג על waveManager בזמן קרב בוס
+        bullets  = bullets.filter(b => !b.dead);
+        enemies  = enemies.filter(e => !e.dead);
+        coins    = coins.filter(c   => !c.dead);
+        powerups = powerups.filter(p => !p.dead);
+        if (announceT > 0) announceT -= delta;
+        gameState.wave = waveManager.wave;
+        return;
+    }
+    // ── סוף גל בוס ────────────────────────────────────────────
+
     const activeCount = enemies.filter(e => !e.dead).length;
     const newEnemy    = waveManager.update(delta, activeCount);
     if (newEnemy) enemies.push(newEnemy);
@@ -758,11 +905,17 @@ function update(delta) {
         sound.waveStart(waveManager.wave);
         gameState.checkWaveMission(waveManager.wave);
 
-        // After a spike wave: show run upgrade picker
         if (waveManager.spikeWaveCleared) {
             waveManager.spikeWaveCleared = false;
-            upgradePickOptions = pickUpgradeOptions(3);
-            // waveDelay is already 0; picker controls the next-wave delay
+            // התחל קרב בוס במקום להציג שדרוג
+            const bossWave = waveManager.wave - 1; // בוס לפי הגל שנסגר
+            bossActive      = true;
+            bosses          = [new BossEnemy(bossWave)];
+            bossBullets     = [];
+            bossAnnounceT   = 2.5;
+            const bType     = getBossType(bossWave);
+            bossAnnounceTxt = `${BOSS_ICONS[bType]} ${BOSS_NAMES[bType]} מגיע!`;
+            announceT = 0; // בטל הכרזת גל רגילה
         }
     }
     if (announceT > 0) announceT -= delta;
@@ -785,6 +938,11 @@ function render() {
     coins.forEach(c   => c.draw(ctx));
     powerups.forEach(p => p.draw(ctx));
     enemies.forEach(e => e.draw(ctx));
+    // כדורי בוס ועל גוף הבוס — בתוך ה-screenShake
+    if (bossActive) {
+        bossBullets.forEach(bb => bb.draw(ctx));
+        bosses.forEach(b => b.drawBody(ctx));
+    }
     drawWorldEffects(ctx);
     bullets.forEach(b => b.draw(ctx));
     cannon.draw(ctx);
@@ -792,11 +950,32 @@ function render() {
     screenShake.restore(ctx);
 
     ui.drawHUD(ctx, gameState.sessionCoins, waveManager ? waveManager.wave : 1, gameState.currentLives, gameState.upgrades.lives);
+    // פס חיים של בוס (מעל ה-HUD, לא רועד)
+    if (bossActive) {
+        bosses.forEach(b => b.drawHUD(ctx));
+    }
     drawUIEffects(ctx);
 
-    // Wave announce only when picker is NOT open
-    if (announceT > 0 && upgradePickOptions.length === 0) {
+    // Wave announce only when picker is NOT open and no boss
+    if (announceT > 0 && upgradePickOptions.length === 0 && !bossActive) {
         ui.drawWaveAnnounce(ctx, lastWave, announceT / 2.0);
+    }
+
+    // הכרזת בוס
+    if (bossActive && bossAnnounceT > 0) {
+        const alpha = Math.min(1.0, bossAnnounceT);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = 'bold 33px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // צל
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillText(bossAnnounceTxt, CANVAS_W / 2 + 2, CANVAS_H * 0.48 + 2);
+        // טקסט
+        ctx.fillStyle = '#ff4444';
+        ctx.fillText(bossAnnounceTxt, CANVAS_W / 2, CANVAS_H * 0.48);
+        ctx.restore();
     }
 
     // Run upgrade picker overlay

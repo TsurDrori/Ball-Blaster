@@ -51,7 +51,7 @@ float fbm(vec2 p) {
 // ─── Zone 0 · SPACE ───────────────────────────────────────────────────────
 // Layered star fields + animated nebula + warp glow + shooting star
 vec3 zone0(vec2 uv, float t) {
-    vec3 col = vec3(0.008, 0.015, 0.06);
+    vec3 col = vec3(0.01, 0.02, 0.09);
 
     // 3 layers of stars at different scales
     for (int si = 0; si < 3; si++) {
@@ -65,20 +65,22 @@ vec3 zone0(vec2 uv, float t) {
         float sz   = 0.017 + h * 0.02 - sc * 0.004;
         float blink = 0.5 + 0.5 * sin(t * (1.5 + h * 5.0) + h * 6.28);
         float star = smoothstep(sz, 0.0, length(fv - off));
-        col += mix(vec3(0.78, 0.91, 1.0), vec3(1.0, 0.84, 0.62), h)
-               * star * (0.3 + sc * 0.2) * blink;
+        col += mix(vec3(0.85, 0.95, 1.0), vec3(1.0, 0.88, 0.65), h)
+               * star * (0.45 + sc * 0.25) * blink;
     }
 
-    // Nebula gas clouds
+    // Nebula gas clouds — vivid pink/purple/teal
     float n1 = fbm(uv * 2.0 + vec2(t * 0.022, 0.0));
     float n2 = fbm(uv * 3.5 + vec2(0.0, t * 0.018) + n1);
-    col += vec3(0.03, 0.01, 0.15) * n1 * n1 * 3.0;
-    col += vec3(0.01, 0.04, 0.13) * n2 * 2.0;
+    float n3 = fbm(uv * 1.4 + vec2(t * 0.015, t * 0.011));
+    col += vec3(0.42, 0.04, 0.75) * n1 * n1 * 2.2;
+    col += vec3(0.04, 0.28, 0.80) * n2 * 1.6;
+    col += vec3(0.70, 0.05, 0.40) * n3 * n3 * 0.9;
 
     // Central warp glow
     float d = length(uv - 0.5);
     float glow = max(0.0, 1.0 - d * 2.6);
-    col += vec3(0.01, 0.04, 0.12) * glow * glow;
+    col += vec3(0.05, 0.08, 0.30) * glow * glow;
 
     // Shooting star (time-based, crosses screen diagonally)
     float stCycle = floor(t * 0.18);
@@ -205,10 +207,11 @@ vec3 zone4(vec2 uv, float t) {
     float n2 = fbm(dist * 6.0 - t * 0.028 + n1 * 0.85);
     float n3 = fbm(uv  * 1.9 + vec2(n2, n1) * 0.55 - t * 0.019);
 
-    vec3 col = vec3(0.004, 0.0, 0.011);
-    col += vec3(0.32, 0.04, 0.88) * n1 * n1 * 2.5;
-    col += vec3(0.07, 0.0,  0.44) * n2 * 1.4;
-    col += vec3(0.55, 0.11, 1.00) * n3 * n3 * 1.0;
+    vec3 col = vec3(0.012, 0.002, 0.028);
+    col += vec3(0.45, 0.05, 1.00) * n1 * n1 * 3.0;
+    col += vec3(0.08, 0.02, 0.60) * n2 * 1.8;
+    col += vec3(0.65, 0.14, 1.00) * n3 * n3 * 1.2;
+    col += vec3(0.0, 0.55, 0.85) * n2 * n3 * 0.7;
 
     // Central void pull — darkens center
     float vd = 1.0 - smoothstep(0.0, 0.44, r);
@@ -389,91 +392,110 @@ float _tower(vec2 uv, float tx1, float tx2, float ty1, float ty2, float spireH) 
 }
 
 vec3 zone9(vec2 uv, float t) {
-    // Deep night sky
-    vec3 col = mix(vec3(0.04, 0.02, 0.09), vec3(0.01, 0.005, 0.03), uv.y * 0.7);
+    // Night sky — richer deep blue-purple
+    vec3 col = mix(vec3(0.07, 0.03, 0.18), vec3(0.02, 0.008, 0.06), uv.y * 0.9);
 
-    // Stars
+    // Magical aurora above castle — shifting purple/blue curtains
+    float aurN = fbm(uv * 1.8 + vec2(t * 0.022, 0.0));
+    float aurZone = smoothstep(0.55, 0.10, uv.y);
+    col += vec3(0.25, 0.05, 0.60) * aurN * aurN * aurZone * 1.4;
+    col += vec3(0.04, 0.18, 0.65) * (1.0 - aurN) * aurN * aurZone * 0.9;
+    col += vec3(0.55, 0.08, 0.30) * fbm(uv * 2.2 - vec2(t * 0.018)) * aurZone * 0.5;
+
+    // Stars — bright and dense
     for (int si = 0; si < 3; si++) {
         float sc  = float(si);
-        vec2  gv  = uv * (28.0 + sc * 18.0);
+        vec2  gv  = uv * (30.0 + sc * 20.0);
         vec2  id  = floor(gv);
         vec2  fv  = fract(gv) - 0.5;
         float h   = hash(id + sc * 37.1);
-        float blink = 0.55 + 0.45 * sin(t * (1.1 + h * 4.5) + h * 6.28);
+        float blink = 0.5 + 0.5 * sin(t * (1.1 + h * 4.5) + h * 6.28);
         float star  = smoothstep(0.018, 0.0, length(fv - (hash2(id + sc) - 0.5) * 0.45));
-        col += mix(vec3(0.85, 0.82, 1.0), vec3(1.0, 0.92, 0.7), h) * star * (0.35 + sc * 0.1) * blink;
+        col += mix(vec3(0.95, 0.88, 1.0), vec3(1.0, 0.95, 0.72), h) * star * (0.6 + sc * 0.15) * blink;
     }
 
-    // Moon
-    vec2  moonP = vec2(0.76, 0.16);
+    // Moon — large and bright with warm glow
+    vec2  moonP = vec2(0.76, 0.14);
     float moonD = length(uv - moonP);
-    col = mix(col, vec3(0.97, 0.95, 0.86), smoothstep(0.062, 0.052, moonD));
-    col += vec3(0.55, 0.48, 0.22) * smoothstep(0.22, 0.0, moonD) * 0.22;
+    col = mix(col, vec3(1.0, 0.97, 0.88), smoothstep(0.075, 0.060, moonD));
+    col += vec3(0.70, 0.55, 0.18) * smoothstep(0.30, 0.0, moonD) * 0.38;
+    col += vec3(0.45, 0.20, 0.65) * smoothstep(0.14, 0.0, moonD) * 0.22;
 
-    // Castle structure (uv.y=0 top, uv.y=1 bottom — castle rises from bottom)
+    // Castle structure
     float castle = 0.0;
-    // Wide base wall
     castle = max(castle, _tower(uv, 0.08, 0.92, 0.70, 0.85, 0.0));
-    // Center grand spire
     castle = max(castle, _tower(uv, 0.42, 0.58, 0.28, 0.80, 0.14));
-    // Left main tower
     castle = max(castle, _tower(uv, 0.10, 0.22, 0.38, 0.80, 0.10));
-    // Right main tower
     castle = max(castle, _tower(uv, 0.78, 0.90, 0.38, 0.80, 0.10));
-    // Inner left tower
     castle = max(castle, _tower(uv, 0.25, 0.36, 0.48, 0.78, 0.07));
-    // Inner right tower
     castle = max(castle, _tower(uv, 0.64, 0.75, 0.48, 0.78, 0.07));
-    // Far-left small tower
     castle = max(castle, _tower(uv, 0.01, 0.09, 0.52, 0.78, 0.06));
-    // Far-right small tower
     castle = max(castle, _tower(uv, 0.91, 0.99, 0.55, 0.78, 0.06));
-    // Connecting bridge/wall segment
     castle = max(castle, _tower(uv, 0.22, 0.42, 0.60, 0.73, 0.0));
     castle = max(castle, _tower(uv, 0.58, 0.78, 0.60, 0.73, 0.0));
 
-    vec3 castleCol = vec3(0.045, 0.038, 0.065);
+    // Castle colour with warm moonlit rim
+    vec3 castleCol = vec3(0.058, 0.048, 0.088);
+    float moonRim = max(0.0, 1.0 - length(uv - moonP) * 1.8);
+    castleCol += vec3(0.12, 0.10, 0.22) * moonRim * 0.15;
     col = mix(col, castleCol, castle);
 
-    // Torch-lit windows inside castle
+    // Torch-lit windows — warm amber flicker
     vec2  winId  = floor(uv * vec2(24.0, 20.0));
     vec2  winFr  = fract(uv * vec2(24.0, 20.0));
     float winOn  = step(0.20, winFr.x) * step(winFr.x, 0.74)
                  * step(0.22, winFr.y) * step(winFr.y, 0.72);
     float wFlick = 0.65 + 0.35 * sin(t * (1.8 + hash(winId) * 5.0) + hash(winId + 3.0) * 6.28);
-    col += castle * winOn * wFlick * vec3(1.0, 0.60, 0.15) * 0.55;
-    col += castle * winOn * wFlick * vec3(0.9, 0.28, 0.0) * smoothstep(0.3, 0.0, length(winFr - 0.5)) * 0.3;
+    col += castle * winOn * wFlick * vec3(1.0, 0.65, 0.18) * 0.80;
+    col += castle * winOn * wFlick * vec3(0.9, 0.30, 0.02)
+         * smoothstep(0.30, 0.0, length(winFr - 0.5)) * 0.50;
+    // Window light bleeds on castle exterior
+    col += castle * winOn * wFlick * vec3(0.45, 0.22, 0.03)
+         * smoothstep(0.42, 0.30, length(winFr - 0.5)) * 0.22;
 
-    // Floating candles
-    for (int ci = 0; ci < 12; ci++) {
-        float fi  = float(ci);
-        float cx_ = 0.12 + hash(vec2(fi, 0.0)) * 0.76;
-        float cy_ = 0.36 + hash(vec2(fi, 1.0)) * 0.32;
-        cy_ += sin(t * (0.45 + hash(vec2(fi, 2.0)) * 0.7) + fi * 1.3) * 0.022;
-        cx_ += sin(t * (0.28 + hash(vec2(fi, 3.0)) * 0.45) + fi * 2.2) * 0.012;
-        float cd  = length(uv - vec2(cx_, cy_));
-        float cp  = 0.7 + 0.3 * sin(t * (1.4 + fi * 0.45));
-        col += vec3(1.0, 0.80, 0.30) * smoothstep(0.007, 0.0, cd) * cp;
-        col += vec3(0.65, 0.28, 0.04) * smoothstep(0.028, 0.002, cd) * cp * 0.45;
+    // Golden magical sparkles drifting around the castle
+    for (int si = 0; si < 18; si++) {
+        float fi = float(si);
+        float sx = 0.06 + hash(vec2(fi, 7.0)) * 0.88;
+        float sy = 0.28 + hash(vec2(fi, 8.0)) * 0.50;
+        sy += sin(t * (0.35 + hash(vec2(fi, 9.0)) * 0.85) + fi * 2.1) * 0.030;
+        sx += sin(t * (0.22 + hash(vec2(fi, 10.0)) * 0.55) + fi * 1.7) * 0.018;
+        float sd = length(uv - vec2(sx, sy));
+        float sp = 0.45 + 0.55 * sin(t * (2.4 + fi * 0.7) + fi * 2.3);
+        col += vec3(1.0, 0.88, 0.22) * smoothstep(0.005, 0.0, sd) * sp;
+        col += vec3(0.75, 0.48, 0.06) * smoothstep(0.022, 0.001, sd) * sp * 0.40;
     }
 
-    // Owls (slow-moving dots)
+    // Floating candles — more of them, brighter
+    for (int ci = 0; ci < 18; ci++) {
+        float fi  = float(ci);
+        float cx_ = 0.06 + hash(vec2(fi, 0.0)) * 0.88;
+        float cy_ = 0.30 + hash(vec2(fi, 1.0)) * 0.40;
+        cy_ += sin(t * (0.45 + hash(vec2(fi, 2.0)) * 0.7) + fi * 1.3) * 0.030;
+        cx_ += sin(t * (0.28 + hash(vec2(fi, 3.0)) * 0.45) + fi * 2.2) * 0.016;
+        float cd  = length(uv - vec2(cx_, cy_));
+        float cp  = 0.65 + 0.35 * sin(t * (1.4 + fi * 0.45));
+        col += vec3(1.0, 0.82, 0.38) * smoothstep(0.007, 0.0, cd) * cp;
+        col += vec3(0.72, 0.32, 0.06) * smoothstep(0.035, 0.002, cd) * cp * 0.55;
+    }
+
+    // Owls (slow-moving silhouettes)
     for (int oi = 0; oi < 4; oi++) {
         float fi = float(oi);
         float ox = fract(0.08 + hash(vec2(fi, 4.0)) + t * (0.005 + fi * 0.0025));
         float oy = 0.42 + hash(vec2(fi, 5.0)) * 0.22 + sin(t * 0.38 + fi * 1.9) * 0.025;
         float od = length(uv - vec2(ox, oy));
-        col += vec3(0.65, 0.60, 0.48) * smoothstep(0.005, 0.0, od);
+        col += vec3(0.75, 0.70, 0.55) * smoothstep(0.006, 0.0, od);
     }
 
-    // Ground fog (purple mist)
+    // Ground fog — vibrant purple mist
     float fogN = fbm(uv * 2.8 + vec2(t * 0.022, 0.0));
-    float fog  = smoothstep(0.62, 0.88, uv.y);
-    col = mix(col, vec3(0.17, 0.07, 0.28), fog * (0.45 + fogN * 0.55) * 0.72);
+    float fog  = smoothstep(0.60, 0.90, uv.y);
+    col = mix(col, vec3(0.26, 0.08, 0.45), fog * (0.45 + fogN * 0.55) * 0.70);
 
     // Dark hill at very base
-    float hill = smoothstep(0.87, 0.92, uv.y + sin(uv.x * 3.5) * 0.012);
-    col = mix(col, vec3(0.02, 0.015, 0.03), hill);
+    float hill = smoothstep(0.87, 0.93, uv.y + sin(uv.x * 3.5) * 0.012);
+    col = mix(col, vec3(0.025, 0.018, 0.035), hill);
 
     return col;
 }

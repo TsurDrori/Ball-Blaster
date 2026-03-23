@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ball Blast</title>
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -27,6 +27,8 @@
             <button class="shop-tab active" id="tab-upgrades" onclick="switchShopTab('upgrades')">⚡ שדרוגים</button>
             <button class="shop-tab" id="tab-skins" onclick="switchShopTab('skins')">🎨 סקינים</button>
         </div>
+
+        <div id="prestige-toast"></div>
 
         <div id="upgrade-shop">
             <div class="shop-heading">🛒 שדרוגים</div>
@@ -103,20 +105,21 @@
     </div>
 
     <!-- Load order matters: constants first, then classes, then main loop -->
-    <script src="skins.js?v=5"></script>
-    <script src="webgl-background.js?v=5"></script>
-    <script src="background.js?v=5"></script>
-    <script src="sound.js?v=5"></script>
-    <script src="gameState.js?v=5"></script>
-    <script src="bullet.js?v=5"></script>
-    <script src="cannon.js?v=5"></script>
-    <script src="enemy.js?v=5"></script>
-    <script src="coin.js?v=5"></script>
-    <script src="powerup.js?v=5"></script>
-    <script src="waveManager.js?v=5"></script>
-    <script src="ui.js?v=5"></script>
-    <script src="effects.js?v=5"></script>
-    <script src="game.js?v=5"></script>
+    <script src="skins.js?v=6"></script>
+    <script src="webgl-background.js?v=6"></script>
+    <script src="background.js?v=6"></script>
+    <script src="sound.js?v=6"></script>
+    <script src="gameState.js?v=6"></script>
+    <script src="bullet.js?v=6"></script>
+    <script src="cannon.js?v=6"></script>
+    <script src="enemy.js?v=6"></script>
+    <script src="coin.js?v=6"></script>
+    <script src="powerup.js?v=6"></script>
+    <script src="waveManager.js?v=6"></script>
+    <script src="ui.js?v=6"></script>
+    <script src="effects.js?v=6"></script>
+    <script src="boss.js?v=6"></script>
+    <script src="game.js?v=6"></script>
     <script>
         // הצג פאנל פיתוח רק אם הכתובת מכילה ?dev
         if (!new URLSearchParams(window.location.search).has('dev')) {

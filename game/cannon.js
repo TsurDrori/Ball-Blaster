@@ -16,8 +16,8 @@ class Cannon {
     }
     // Cap at 8 (was 10) — run upgrades like 'marked' and 'pierce' cover the gap
     get damage()       { return Math.min(8, gameState.upgrades.damage); }
-    // Cap at 5 (was 7) — leaves room for run upgrades to feel impactful
-    get bulletCount()  { return Math.min(5, gameState.upgrades.multiShot); }
+    // כל 5 רמות מתאפסים ל-1 כדור אבל פי 10 נזק לכדור (פי 2 מסך כל הקודמים)
+    get bulletCount()  { return ((gameState.upgrades.multiShot - 1) % 5) + 1; }
     get bulletRadius() { return 9  + (gameState.upgrades.ballSize  - 1) * 2; }
     get bulletSpeed()  { return 520; }
     // 'magnetic' run upgrade doubles the coin pickup radius
@@ -55,16 +55,33 @@ class Cannon {
         const activeBullet = gameState.skins?.activeBullet || 'default';
 
         let bulletSkin   = activeBullet;
-        let damageMult   = 1;
-        let radiusMult   = 1;
 
+        // מחזור: כל 5 רמות חוזרים ל-1 כדור אבל פי 10 נזק (= פי 2 מסך כל המחזור הקודם)
+        // נוסחה: נזק לכדור = baseDmg × 10^מחזור
+        const cycle      = Math.floor((gameState.upgrades.multiShot - 1) / 5);
+        const cycleMult  = Math.pow(10, cycle);
+        // גודל כדור גדל קצת עם כל מחזור (ויזואלי)
+        const cycleRadiusMult = 1 + cycle * 0.4;
+
+        const isBouncyActive = !isFire && gameState.hasRunUpgrade('bouncy');
         for (let i = 0; i < count; i++) {
             const xOffset = count > 1 ? -totalSpread / 2 + step * i : 0;
-            const radius  = (isFire ? this.bulletRadius * 1.25 : this.bulletRadius) * radiusMult;
-            const damage  = (isFire ? this.damage * 3 : this.damage) * damageMult;
+            const radius  = (isFire ? this.bulletRadius * 1.25 : this.bulletRadius * cycleRadiusMult);
+            const damage  = (isFire ? this.damage * 3 : this.damage * cycleMult);
             const type    = isFire ? 'fire' : 'normal';
-            const b = new Bullet(this.x + xOffset, this.y - this.h / 2 - 4, 0, -this.bulletSpeed, radius, damage, type);
-            b.skin = isFire ? null : bulletSkin; // fire powerup overrides visuals
+            let vx = 0;
+            if (isBouncyActive) {
+                if (count > 1) {
+                    const mid = (count - 1) / 2;
+                    vx = (i - mid) * 40;
+                } else {
+                    // כדור יחיד - נשלח לכיוון הקיר הקרוב
+                    vx = this.x < CANVAS_W / 2 ? -60 : 60;
+                }
+            }
+            const b = new Bullet(this.x + xOffset, this.y - this.h / 2 - 4, vx, -this.bulletSpeed, radius, damage, type);
+            b.skin  = (isFire || cycle > 0) ? null : bulletSkin;
+            b.cycle = cycle;
             result.push(b);
         }
         // Mark the middle bullet as homing
