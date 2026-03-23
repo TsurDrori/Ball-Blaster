@@ -373,6 +373,9 @@ function refreshHomeScreen() {
 
     document.getElementById('hs-wave').textContent = gameState.highScore;
 
+    const diamondEl = document.getElementById('diamond-amount');
+    if (diamondEl) diamondEl.textContent = gameState.totalDiamonds.toLocaleString();
+
     const MAX_LEVELS = { fireRate: 10, damage: 8, multiShot: 15, ballSize: Infinity, lives: Infinity };
     const meta = {
         fireRate:  { icon: '⚡', name: 'קצב ירי',   desc: lv => `${Math.round(10 / Math.max(0.025, 0.16 - (lv-1)*0.015))/10} כדורים/שנ'` },
@@ -424,6 +427,7 @@ function exitToHome() {
     gamePaused = false;
     document.getElementById('pause-overlay').style.display = 'none';
     document.getElementById('pause-btn').textContent = '⏸';
+    gameState.endGame();
     returnToHome();
 }
 

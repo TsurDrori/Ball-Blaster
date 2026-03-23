@@ -52,6 +52,12 @@ body {
     padding: 12px 18px;
 }
 
+#bank-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 #bank-display {
     display: flex;
     align-items: center;
@@ -60,6 +66,16 @@ body {
     font-weight: bold;
     color: #ffd700;
     text-shadow: 0 0 18px rgba(255,215,0,0.4);
+}
+
+#diamond-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #00e5ff;
+    text-shadow: 0 0 14px rgba(0,229,255,0.45);
 }
 
 .coin-icon { font-size: 30px; }
