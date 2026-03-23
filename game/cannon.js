@@ -16,8 +16,13 @@ class Cannon {
     }
     // Cap at 8 (was 10) — run upgrades like 'marked' and 'pierce' cover the gap
     get damage()       { return Math.min(8, gameState.upgrades.damage); }
-    // כל 5 רמות מתאפסים ל-1 כדור אבל פי 10 נזק לכדור (פי 2 מסך כל הקודמים)
-    get bulletCount()  { return ((gameState.upgrades.multiShot - 1) % 5) + 1; }
+    // מחזור C מתחיל ב-C כדורי פרסטיג' ומוסיף עד 4 רגילים (סה"כ C+4 בסוף המחזור)
+    get bulletCount() {
+        const lv    = gameState.upgrades.multiShot;
+        const cycle = Math.floor((lv - 1) / 5);
+        const pos   = (lv - 1) % 5; // מיקום בתוך המחזור: 0..4
+        return cycle > 0 ? cycle + pos : pos + 1;
+    }
     get bulletRadius() { return 9  + (gameState.upgrades.ballSize  - 1) * 2; }
     get bulletSpeed()  { return 520; }
     // 'magnetic' run upgrade doubles the coin pickup radius
@@ -56,18 +61,22 @@ class Cannon {
 
         let bulletSkin   = activeBullet;
 
-        // מחזור: כל 5 רמות חוזרים ל-1 כדור אבל פי 10 נזק (= פי 2 מסך כל המחזור הקודם)
-        // נוסחה: נזק לכדור = baseDmg × 10^מחזור
-        const cycle      = Math.floor((gameState.upgrades.multiShot - 1) / 5);
-        const cycleMult  = Math.pow(10, cycle);
-        // גודל כדור גדל קצת עם כל מחזור (ויזואלי)
-        const cycleRadiusMult = 1 + cycle * 0.4;
+        // מחזור C: cycle כדורי פרסטיג' (×10^cycle נזק) + שאר כדורים רגילים.
+        // כדורי הפרסטיג' מרוכזים במרכז המניפה.
+        const cycle          = Math.floor((gameState.upgrades.multiShot - 1) / 5);
+        const prestigeCount  = cycle; // מס' כדורי פרסטיג' = מספר המחזור
+        const prestigeStart  = Math.floor((count - prestigeCount) / 2); // מרכוז
 
         const isBouncyActive = !isFire && gameState.hasRunUpgrade('bouncy');
         for (let i = 0; i < count; i++) {
-            const xOffset = count > 1 ? -totalSpread / 2 + step * i : 0;
-            const radius  = (isFire ? this.bulletRadius * 1.25 : this.bulletRadius * cycleRadiusMult);
-            const damage  = (isFire ? this.damage * 3 : this.damage * cycleMult);
+            const xOffset    = count > 1 ? -totalSpread / 2 + step * i : 0;
+            const isPrestige = !isFire && cycle > 0 && i >= prestigeStart && i < prestigeStart + prestigeCount;
+            const radius     = isFire       ? this.bulletRadius * 1.25
+                             : isPrestige   ? this.bulletRadius * (1 + cycle * 0.4)
+                             :                this.bulletRadius;
+            const damage     = isFire       ? this.damage * 3
+                             : isPrestige   ? this.damage * Math.pow(10, cycle)
+                             :                this.damage;
             const type    = isFire ? 'fire' : 'normal';
             let vx = 0;
             if (isBouncyActive) {
@@ -75,13 +84,12 @@ class Cannon {
                     const mid = (count - 1) / 2;
                     vx = (i - mid) * 40;
                 } else {
-                    // כדור יחיד - נשלח לכיוון הקיר הקרוב
                     vx = this.x < CANVAS_W / 2 ? -60 : 60;
                 }
             }
             const b = new Bullet(this.x + xOffset, this.y - this.h / 2 - 4, vx, -this.bulletSpeed, radius, damage, type);
-            b.skin  = (isFire || cycle > 0) ? null : bulletSkin;
-            b.cycle = cycle;
+            b.skin  = (isFire || isPrestige) ? null : bulletSkin;
+            b.cycle = isPrestige ? cycle : 0; // רק הכדור המרכזי מקבל צבע מחזור
             result.push(b);
         }
         // Mark the middle bullet as homing
@@ -133,7 +141,7 @@ class Cannon {
     draw(ctx) {
         // --- magnetic field aura (drawn for all skins) ---
         if (gameState.hasRunUpgrade('magnetic')) {
-            const t  = performance.now() * 0.002;
+            const t  = _frameNow * 0.002;
             const mr = this.collectR;
             ctx.save();
             // Soft field glow
@@ -175,7 +183,7 @@ class Cannon {
 
         // --- shield bubble ---
         if (gameState.shieldTimer > 0) {
-            const t     = performance.now() * 0.003;
+            const t     = _frameNow * 0.003;
             const pulse = 0.82 + 0.18 * Math.sin(t * 3);
             const sr    = 76 * pulse;
             ctx.globalAlpha = 0.45 + 0.15 * Math.sin(t * 2);

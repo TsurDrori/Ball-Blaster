@@ -80,7 +80,7 @@ class UI {
 
         // Active run upgrades strip (small icons below powerup bars)
         const runUps = gameState.runUpgrades;
-        if (runUps.length > 0) {
+        if (runUps.size > 0) {
             const RUN_ICONS = {
                 magnetic: '🧲', gold_rush: '💰', bouncy: '🎱', rapid: '⚡',
                 pierce: '🏹', shield_up: '🛡️', double_heart: '💝',

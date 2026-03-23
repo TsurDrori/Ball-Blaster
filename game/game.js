@@ -7,6 +7,19 @@ const ctx    = canvas.getContext('2d');
 
 let cannon, bullets, enemies, coins, powerups, waveManager, ui;
 let lastTime          = 0;
+
+// ── ביצועים ────────────────────────────────
+// זמן הפריים הנוכחי — מוגדר פעם אחת בלולאה ומועבר לכל פונקציות הציור
+let _frameNow = performance.now();
+
+// מכווץ מערך בעצמו ללא הקצאה — מחליף את .filter(x => !x.dead)
+function _compact(arr) {
+    let w = 0;
+    for (let i = 0; i < arr.length; i++) {
+        if (!arr[i].dead) arr[w++] = arr[i];
+    }
+    arr.length = w;
+}
 let lastWave          = 1;
 let announceT         = 0;
 let gameRunning       = false;
@@ -44,6 +57,12 @@ function _ensurePreviewAnim() {
     }
     _previewRafId = requestAnimationFrame(_previewTick);
 }
+function _stopPreviewAnim() {
+    if (_previewRafId !== null) {
+        cancelAnimationFrame(_previewRafId);
+        _previewRafId = null;
+    }
+}
 
 const RUN_UPGRADE_POOL = [
     { id: 'magnetic',     icon: '🧲', name: 'מגנט מטבעות',  desc: 'רדיוס איסוף מטבעות כפול' },
@@ -60,7 +79,7 @@ const RUN_UPGRADE_POOL = [
 ];
 
 function pickUpgradeOptions(n) {
-    const pool = RUN_UPGRADE_POOL.filter(u => !gameState.runUpgrades.includes(u.id));
+    const pool = RUN_UPGRADE_POOL.filter(u => !gameState.runUpgrades.has(u.id));
     // Shuffle
     for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -76,7 +95,7 @@ function handlePickerClick(cx, cy) {
     for (let i = 0; i < rects.length; i++) {
         const r = rects[i];
         if (cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h) {
-            gameState.runUpgrades.push(upgradePickOptions[i].id);
+            gameState.runUpgrades.add(upgradePickOptions[i].id);
             upgradePickOptions = [];
             waveManager.waveDelay = 1.8;
             sound.upgrade();
@@ -380,7 +399,7 @@ function refreshHomeScreen() {
     const meta = {
         fireRate:  { icon: '⚡', name: 'קצב ירי',   desc: lv => `${Math.round(10 / Math.max(0.025, 0.16 - (lv-1)*0.015))/10} כדורים/שנ'` },
         damage:    { icon: '💥', name: 'עוצמה',     desc: lv => `נזק ${Math.min(8, lv)} לכדור` },
-        multiShot: { icon: '🎯', name: 'רב-כדורי',  desc: lv => { const cycle = Math.floor((lv-1)/5); const bullets = ((lv-1)%5)+1; return cycle > 0 ? `${bullets} כדורים ×${Math.pow(10,cycle)} נזק` : `${bullets} כדורים במקביל`; } },
+        multiShot: { icon: '🎯', name: 'רב-כדורי',  desc: lv => { const cycle = Math.floor((lv-1)/5); const pos = (lv-1)%5; const total = cycle > 0 ? cycle + pos : pos + 1; if (cycle === 0) return `${total} כדורים במקביל`; const normals = pos; const mult = Math.pow(10,cycle); return normals > 0 ? `${cycle}💥×${mult} + ${normals} רגילים` : `${cycle}💥 כדורי ×${mult} נזק`; } },
         ballSize:  { icon: '🔵', name: 'גודל כדור', desc: lv => `רדיוס ${9 + (lv-1)*2}` },
         lives:     { icon: '❤️', name: 'חיים',       desc: lv => `${lv} חיים למשחק` },
     };
@@ -434,6 +453,7 @@ function exitToHome() {
 // ── Screen transitions ────────────────────
 function startGame() {
     sound.unlock();
+    _stopPreviewAnim(); // עצור אנימציית סקינים בזמן משחק
     document.getElementById('home-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'flex';
 
@@ -444,7 +464,7 @@ function startGame() {
     gameState.startNewGame(startWave);
     if (devMode) {
         const boostId = document.getElementById('dev-boost').value;
-        if (boostId) gameState.runUpgrades.push(boostId);
+        if (boostId) gameState.runUpgrades.add(boostId);
     }
     gameState.recordDayPlayed();
 
@@ -823,7 +843,7 @@ function update(delta) {
                 }
             }
         }
-        bossBullets = bossBullets.filter(bb => !bb.dead);
+        _compact(bossBullets);
 
         // כדורי שחקן פוגעים בבוס
         const bossMaxPierce = gameState.hasRunUpgrade('pierce') ? Infinity : 1;
@@ -887,17 +907,18 @@ function update(delta) {
         }
 
         // ניקוי + דלג על waveManager בזמן קרב בוס
-        bullets  = bullets.filter(b => !b.dead);
-        enemies  = enemies.filter(e => !e.dead);
-        coins    = coins.filter(c   => !c.dead);
-        powerups = powerups.filter(p => !p.dead);
+        _compact(bullets);
+        _compact(enemies);
+        _compact(coins);
+        _compact(powerups);
         if (announceT > 0) announceT -= delta;
         gameState.wave = waveManager.wave;
         return;
     }
     // ── סוף גל בוס ────────────────────────────────────────────
 
-    const activeCount = enemies.filter(e => !e.dead).length;
+    let activeCount = 0;
+    for (let _i = 0; _i < enemies.length; _i++) { if (!enemies[_i].dead) activeCount++; }
     const newEnemy    = waveManager.update(delta, activeCount);
     if (newEnemy) enemies.push(newEnemy);
 
@@ -926,10 +947,10 @@ function update(delta) {
 
     gameState.wave = waveManager.wave;
 
-    bullets  = bullets.filter(b => !b.dead);
-    enemies  = enemies.filter(e => !e.dead);
-    coins    = coins.filter(c   => !c.dead);
-    powerups = powerups.filter(p => !p.dead);
+    _compact(bullets);
+    _compact(enemies);
+    _compact(coins);
+    _compact(powerups);
 }
 
 // ── Render ────────────────────────────────
@@ -1012,6 +1033,7 @@ function gameLoop(ts) {
     }
     const delta = Math.min(0.05, (ts - lastTime) / 1000);
     lastTime = ts;
+    _frameNow = ts; // מעדכן פעם אחת בלולאה — נגיש לכל פונקציות הציור
     BG_SYSTEM.update(delta, waveManager ? waveManager.wave : 1);
     try {
         update(delta);

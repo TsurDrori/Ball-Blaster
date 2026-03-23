@@ -33,7 +33,7 @@ class Bullet {
             }
         }
 
-        if (this.y + this.radius < 0 || this.x < -60 || this.x > CANVAS_W + 60) {
+        if (this.y + this.radius < 0 || this.y > CANVAS_H + 60 || this.x < -60 || this.x > CANVAS_W + 60) {
             this.dead = true;
         }
     }

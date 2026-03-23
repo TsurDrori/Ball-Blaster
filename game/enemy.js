@@ -278,7 +278,7 @@ class EnemyBall {
         const r = this.radius;
         const x = this.x, y = this.y;
         const timerFrac = Math.max(0, Math.min(1, this.lifeTimer / 5.0));
-        const t = performance.now() * 0.001;
+        const t = _frameNow * 0.001;
 
         // === זוהר חיצוני פועם ===
         const pulse = 0.88 + 0.12 * Math.sin(t * 3);

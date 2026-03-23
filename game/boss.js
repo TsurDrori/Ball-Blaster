@@ -136,7 +136,7 @@ class BossBullet {
         ctx.strokeStyle = '#ff5500'; ctx.lineWidth = 3; ctx.stroke();
 
         // פתיל מהבהב
-        const t = performance.now() * 0.008;
+        const t = _frameNow * 0.008;
         ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(this.x + 2, this.y - this.radius);
@@ -572,7 +572,7 @@ class BossEnemy {
 
     // ── ציור גוף הבוס ─────────────────────────────────────────
     drawBody(ctx) {
-        const t     = performance.now() * 0.001;
+        const t     = _frameNow * 0.001;
         const p2    = this.phase === 2;
         const tell  = this.isTelling;
         ctx.save();

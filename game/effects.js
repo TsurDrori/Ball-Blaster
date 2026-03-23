@@ -134,9 +134,14 @@ for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
     });
 }
 
+let _pNext = 0; // מצביע מחזורי — מאפשר מציאת חלקיק חופשי ב-O(1) ממוצע
 function _getFreeParticle() {
     for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
-        if (!_pPool[i].active) return _pPool[i];
+        const idx = (_pNext + i) % PARTICLE_POOL_SIZE;
+        if (!_pPool[idx].active) {
+            _pNext = (idx + 1) % PARTICLE_POOL_SIZE;
+            return _pPool[idx];
+        }
     }
     return null; // pool exhausted, skip
 }
@@ -179,11 +184,22 @@ function _updatePool(delta) {
 
 function _drawPool(ctx) {
     ctx.save();
+    // מעבר 1: חלקיקים רגילים (source-over) — ללא החלפת מצב GPU בין כל חלקיק
+    ctx.globalCompositeOperation = 'source-over';
     for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
         const p = _pPool[i];
-        if (!p.active || p.alpha <= 0) continue;
-        if (p.glow) ctx.globalCompositeOperation = 'lighter';
-        else        ctx.globalCompositeOperation = 'source-over';
+        if (!p.active || p.alpha <= 0 || p.glow) continue;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle   = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(0.1, p.radius), 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // מעבר 2: חלקיקי זוהר (additive) — מצב אחד לכל הקבוצה
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+        const p = _pPool[i];
+        if (!p.active || p.alpha <= 0 || !p.glow) continue;
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle   = p.color;
         ctx.beginPath();

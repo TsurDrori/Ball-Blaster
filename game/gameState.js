@@ -39,7 +39,7 @@ const gameState = {
     shieldTimer: 0,
     fireTimer: 0,
     iceTimer: 0,
-    runUpgrades: [], // roguelite upgrades chosen during a run (reset each run)
+    runUpgrades: new Set(), // roguelite upgrades chosen during a run (reset each run)
 
     // ── יהלומים (מטבע פרמיום, נשמר) ─────────────────────────────────────
     totalDiamonds: parseInt(localStorage.getItem('bb_diamonds') || '0'),
@@ -85,7 +85,7 @@ const gameState = {
     },
 
     hasRunUpgrade(id) {
-        return this.runUpgrades.includes(id);
+        return this.runUpgrades.has(id);
     },
 
     endGame() {
@@ -110,7 +110,7 @@ const gameState = {
         this.shieldTimer     = 0;
         this.fireTimer       = 0;
         this.iceTimer        = 0;
-        this.runUpgrades     = [];
+        this.runUpgrades     = new Set();
     },
 
     hasSkinUnlocked(id, type) {
