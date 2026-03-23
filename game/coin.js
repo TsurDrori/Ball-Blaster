@@ -6,20 +6,37 @@ class Coin {
         this.vy        = -60 - Math.random() * 80;
         this.value     = value;
         this.isDiamond = isDiamond;
-        this.radius    = isDiamond ? 9 : 7;
+        this.radius    = isDiamond ? 18 : 14;
         this.dead      = false;
         this.age       = 0;
     }
 
-    update(delta) {
+    update(delta, magnet) {
         const gravity = 280;
+        let inMagnetField = false;
+
+        if (magnet) {
+            const dx = magnet.x - this.x;
+            const dy = magnet.y - this.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < magnet.r * magnet.r && distSq > 1) {
+                const dist = Math.sqrt(distSq);
+                const pull = 1200; // px/s² — strong enough to overcome gravity
+                this.vx += (dx / dist) * pull * delta;
+                this.vy += (dy / dist) * pull * delta;
+                inMagnetField = true;
+            }
+        }
+
         this.vy += gravity * delta;
         this.x  += this.vx * delta;
         this.y  += this.vy * delta;
         this.age += delta;
 
-        // Dampen horizontal
-        this.vx *= Math.pow(0.92, delta * 60);
+        // Skip horizontal damping when being magnetically pulled
+        if (!inMagnetField) {
+            this.vx *= Math.pow(0.92, delta * 60);
+        }
 
         if (this.y > CANVAS_H + 40) this.dead = true;
     }
@@ -55,12 +72,12 @@ class Coin {
         ctx.lineWidth   = 1;
         ctx.stroke();
 
-        // $ symbol
+        // coin value
         ctx.fillStyle    = '#7a5a00';
-        ctx.font         = `bold ${Math.floor(r * 1.2)}px Arial`;
+        ctx.font         = `bold ${Math.floor(r * 0.95)}px Arial`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('$', this.x, this.y + 0.5);
+        ctx.fillText(this.value, this.x, this.y + 0.5);
 
         ctx.restore();
     }

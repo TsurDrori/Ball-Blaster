@@ -168,7 +168,7 @@ class BossEnemy {
         this.type   = overrideType || getBossType(wave);
         this.isMini = isMini;
 
-        const base   = Math.floor(Math.pow(wave, 1.8) * 8);
+        const base   = Math.floor(Math.pow(wave, 1.8) * 400);
         this.maxHp   = isMini ? Math.floor(base * 0.55) : base;
         this.hp      = this.maxHp;
         this.radius  = isMini ? 38 : 52;

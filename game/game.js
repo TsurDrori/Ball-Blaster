@@ -764,7 +764,8 @@ function update(delta) {
         }
     }
 
-    for (const c of coins) c.update(delta);
+    const magnetCollector = gameState.hasRunUpgrade('magnetic') ? cannon.getCollector() : null;
+    for (const c of coins) c.update(delta, magnetCollector);
 
     // Spawn and update powerups
     powerupSpawnTimer -= delta;

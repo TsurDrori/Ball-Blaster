@@ -131,6 +131,37 @@ class Cannon {
     }
 
     draw(ctx) {
+        // --- magnetic field aura (drawn for all skins) ---
+        if (gameState.hasRunUpgrade('magnetic')) {
+            const t  = performance.now() * 0.002;
+            const mr = this.collectR;
+            ctx.save();
+            // Soft field glow
+            const mg = ctx.createRadialGradient(this.x, this.y, mr * 0.3, this.x, this.y, mr);
+            mg.addColorStop(0,   'rgba(200,50,255,0)');
+            mg.addColorStop(0.75,'rgba(180,40,255,0.08)');
+            mg.addColorStop(1,   'rgba(140,0,220,0)');
+            ctx.fillStyle = mg;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, mr, 0, Math.PI * 2);
+            ctx.fill();
+            // Pulsing dashed ring
+            ctx.setLineDash([10, 7]);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = `rgba(210,80,255,${0.35 + 0.2 * Math.sin(t * 3)})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, mr * (0.9 + 0.06 * Math.sin(t * 2.5)), 0, Math.PI * 2);
+            ctx.stroke();
+            // Inner counter-phase ring
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = `rgba(255,120,255,${0.2 + 0.15 * Math.sin(t * 3 + Math.PI)})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, mr * 0.55 * (0.9 + 0.06 * Math.sin(t * 3 + Math.PI)), 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        }
+
         const activeSkin = gameState.skins?.activeCannon || 'default';
         if (activeSkin !== 'default') {
             drawCannonSkin(ctx, this, activeSkin);
