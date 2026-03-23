@@ -503,7 +503,6 @@ function checkCollisions() {
     for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
         if (b.dead) continue;
-        if (gameState.iceTimer > 0) continue; // קרח קופא - כדורים לא פוגעים
         for (let j = enemies.length - 1; j >= 0; j--) {
             const e = enemies[j];
             if (e.dead) continue;
