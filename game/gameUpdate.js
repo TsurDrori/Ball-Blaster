@@ -209,7 +209,7 @@ function update(delta) {
                 fxEnemyDeath(bx, by, '#ffaa00', boss.maxHp * 0.5);
                 screenShake.trigger(0.4, 10);
                 sound.explode();
-                floatingTexts.push(new FloatingText(bx, by - 50, '✂️ מתפצל!', '#ffaa44', 24));
+                floatingTexts.push(new FloatingText(bx, by - 50, 'מתפצל!', '#ffaa44', 24));
             } else {
                 // מוות רגיל — מטבעות + אפקטים
                 const bx = boss.x, by = boss.y;
@@ -230,7 +230,7 @@ function update(delta) {
             upgradePickOptions = pickUpgradeOptions(3);
             screenShake.trigger(0.8, 20);
             sound.explode();
-            floatingTexts.push(new FloatingText(CANVAS_W / 2, CANVAS_H * 0.42, '💀 בוס הובס!', '#ffcc00', 34));
+            floatingTexts.push(new FloatingText(CANVAS_W / 2, CANVAS_H * 0.42, 'בוס הובס!', '#ffcc00', 34));
         }
 
         // ניקוי + דלג על waveManager בזמן קרב בוס

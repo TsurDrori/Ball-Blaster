@@ -138,7 +138,7 @@ BossEnemy.prototype.drawBody = function(ctx) {
     // אייקון בוס
     ctx.font = `${Math.floor(this.radius * 0.70)}px Arial`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(BOSS_ICONS[this.type] || '💀', this.x, this.y);
+    ctx.fillText(BOSS_ICONS[this.type] || '\u2605', this.x, this.y);
 
     // פלאש לבן בפגיעה
     if (this.flashTimer > 0) {
