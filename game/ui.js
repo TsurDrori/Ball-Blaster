@@ -32,15 +32,16 @@ class UI {
         ctx.textBaseline = 'middle';
         ctx.fillText(coins.toLocaleString(), 34, 24);
 
-        // Diamond icon + count (session)
+        // Diamond icon + count (session) — U+25C6 solid diamond, not emoji
         const diamonds = gameState.sessionDiamonds || 0;
         if (diamonds > 0 || gameState.wave >= 11) {
-            ctx.font         = '16px Arial';
+            const coinTxtW = ctx.measureText(coins.toLocaleString()).width;
+            ctx.fillStyle    = '#28b4cc';
+            ctx.font         = '14px Arial';
             ctx.textBaseline = 'middle';
-            ctx.fillText('💎', 34 + ctx.measureText(coins.toLocaleString()).width + 10, 24);
-            ctx.fillStyle = '#00e5ff';
+            ctx.fillText('\u25C6', 34 + coinTxtW + 10, 24);
             ctx.font      = 'bold 16px Arial';
-            ctx.fillText(diamonds, 34 + ctx.measureText(coins.toLocaleString()).width + 30, 24);
+            ctx.fillText(diamonds, 34 + coinTxtW + 26, 24);
         }
 
         // Wave
@@ -56,10 +57,12 @@ class UI {
             const totalW    = maxLives * spacing - (spacing - heartSize);
             let hx = CANVAS_W - 12 - totalW;
             for (let i = 0; i < maxLives; i++) {
-                ctx.font      = `${heartSize}px Arial`;
-                ctx.textAlign = 'left';
+                // U+2665 solid heart — not emoji, renders with fillStyle color
+                ctx.fillStyle   = i < currentLives ? '#e04060' : '#604050';
+                ctx.font        = `${heartSize}px Arial`;
+                ctx.textAlign   = 'left';
                 ctx.globalAlpha = i < currentLives ? 1 : 0.25;
-                ctx.fillText('❤️', hx, 24 - heartSize / 2 + 2);
+                ctx.fillText('\u2665', hx, 24 - heartSize / 2 + 2);
                 hx += spacing;
             }
             ctx.globalAlpha = 1;
@@ -73,18 +76,18 @@ class UI {
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillRect(0, 48, CANVAS_W, 20);
             let bx = 8;
-            if (shieldT > 0) { this._drawPowerBar(ctx, bx, 58, shieldT, 8,  '🛡️', '#00aaff'); bx += 158; }
-            if (fireT   > 0) { this._drawPowerBar(ctx, bx, 58, fireT,   10, '🔥', '#ff6600'); bx += 158; }
-            if (iceT    > 0) { this._drawPowerBar(ctx, bx, 58, iceT,    5,  '❄️', '#aaf0ff'); }
+            if (shieldT > 0) { this._drawPowerBar(ctx, bx, 58, shieldT, 8,  'מגן', '#00aaff'); bx += 160; }
+            if (fireT   > 0) { this._drawPowerBar(ctx, bx, 58, fireT,   10, 'אש',  '#ff6600'); bx += 160; }
+            if (iceT    > 0) { this._drawPowerBar(ctx, bx, 58, iceT,    5,  'קר',  '#aaf0ff'); }
         }
 
         // Active run upgrades strip (small icons below powerup bars)
         const runUps = gameState.runUpgrades;
         if (runUps.size > 0) {
             const RUN_ICONS = {
-                magnetic: '🧲', gold_rush: '💰', bouncy: '🎱', rapid: '⚡',
-                pierce: '🏹', shield_up: '🛡️', double_heart: '💝',
-                homing: '🚀', explosion: '💥', freeze: '❄️', heal: '💚',
+                magnetic: 'מג', gold_rush: 'זה', bouncy: 'קפ', rapid: 'מה',
+                pierce: 'חד', shield_up: 'מן', double_heart: 'לב',
+                homing: 'טי', explosion: 'פצ', freeze: 'קר', heal: 'רפ',
             };
             const barY = (shieldT > 0 || fireT > 0 || iceT > 0) ? 72 : 50;
             ctx.fillStyle = 'rgba(0,0,0,0.4)';
@@ -103,30 +106,36 @@ class UI {
     }
 
     _drawPowerBar(ctx, x, cy, timer, maxTime, icon, color) {
-        const barW = 120;
+        const barW = 110;
         const barH = 8;
         const fill = Math.min(1, timer / maxTime);
 
-        ctx.fillStyle = 'rgba(255,255,255,0.12)';
-        ctx.beginPath();
-        ctx.roundRect(x + 19, cy - barH / 2, barW, barH, 3);
-        ctx.fill();
-
-        ctx.fillStyle   = color;
-        ctx.globalAlpha = 0.9;
-        ctx.beginPath();
-        ctx.roundRect(x + 19, cy - barH / 2, Math.max(3, barW * fill), barH, 3);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-
-        ctx.font         = '13px Arial';
+        // Icon label (text, no emoji)
+        ctx.fillStyle    = color;
+        ctx.font         = 'bold 11px Arial';
         ctx.textAlign    = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(icon, x, cy + 1);
+        const iconW = Math.ceil(ctx.measureText(icon).width) + 5;
 
+        // Bar background
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.beginPath();
+        ctx.roundRect(x + iconW, cy - barH / 2, barW, barH, 3);
+        ctx.fill();
+
+        // Bar fill
+        ctx.fillStyle   = color;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.roundRect(x + iconW, cy - barH / 2, Math.max(3, barW * fill), barH, 3);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Timer text
         ctx.fillStyle = '#cccccc';
         ctx.font      = '10px Arial';
-        ctx.fillText(Math.ceil(timer) + 's', x + 19 + barW + 3, cy);
+        ctx.fillText(Math.ceil(timer) + 's', x + iconW + barW + 3, cy);
     }
 
     _drawCoinIcon(ctx, cx, cy, r) {

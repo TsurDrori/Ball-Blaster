@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ball Blast</title>
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
     <!-- ══ מסך הבית ══ -->
     <div id="home-screen">
-        <h1>💣 Ball Blast</h1>
+        <h1>Ball Blast</h1>
 
         <div id="bank-row">
             <div id="bank-left">
                 <div id="bank-display">
-                    <span class="coin-icon">🪙</span>
+                    <span class="coin-icon" aria-hidden="true"></span>
                     <span id="bank-amount">0</span>
                 </div>
                 <div id="diamond-display">
-                    <span>💎</span>
+                    <span class="diamond-icon" aria-hidden="true">◆</span>
                     <span id="diamond-amount">0</span>
                 </div>
             </div>
@@ -30,49 +33,44 @@
         </div>
 
         <div id="shop-tabs">
-            <button class="shop-tab active" id="tab-upgrades" onclick="switchShopTab('upgrades')">⚡ שדרוגים</button>
-            <button class="shop-tab" id="tab-skins" onclick="switchShopTab('skins')">🎨 סקינים</button>
+            <button class="shop-tab active" id="tab-upgrades" onclick="switchShopTab('upgrades')">שדרוגים</button>
+            <button class="shop-tab" id="tab-skins" onclick="switchShopTab('skins')">סקינים</button>
         </div>
 
         <div id="prestige-toast"></div>
 
         <div id="upgrade-shop">
-            <div class="shop-heading">🛒 שדרוגים</div>
+            <div class="shop-heading">שדרוגים</div>
             <div id="upgrade-grid">
-                <button class="upgrade-btn" id="btn-fireRate"  onclick="buyUpgrade('fireRate')">
-                    ⚡ קצב ירי<br><small>Lv.1 · 🪙50</small>
-                </button>
-                <button class="upgrade-btn" id="btn-damage"    onclick="buyUpgrade('damage')">
-                    💥 עוצמה<br><small>Lv.1 · 🪙80</small>
-                </button>
-                <button class="upgrade-btn" id="btn-multiShot" onclick="buyUpgrade('multiShot')">
-                    🎯 רב-כדורי<br><small>Lv.1 · 🪙120</small>
-                </button>
-                <button class="upgrade-btn" id="btn-ballSize"  onclick="buyUpgrade('ballSize')">
-                    🔵 גודל כדור<br><small>Lv.1 · 🪙60</small>
-                </button>
-                <button class="upgrade-btn" id="btn-lives"     onclick="buyUpgrade('lives')">
-                    ❤️ חיים<br><small>Lv.1 · 🪙100</small>
-                </button>
+                <button class="upgrade-btn" id="btn-fireRate"  onclick="buyUpgrade('fireRate')">קצב ירי</button>
+                <button class="upgrade-btn" id="btn-damage"    onclick="buyUpgrade('damage')">עוצמה</button>
+                <button class="upgrade-btn" id="btn-multiShot" onclick="buyUpgrade('multiShot')">רב-כדורי</button>
+                <button class="upgrade-btn" id="btn-ballSize"  onclick="buyUpgrade('ballSize')">גודל כדור</button>
+                <button class="upgrade-btn" id="btn-lives"     onclick="buyUpgrade('lives')">חיים</button>
             </div>
         </div>
 
         <div id="skins-shop" style="display:none">
             <div id="skin-subtabs">
-                <button class="skin-subtab active" id="stab-cannon" onclick="switchSkinSubtab('cannon')">🔫 תותח</button>
-                <button class="skin-subtab" id="stab-bullet" onclick="switchSkinSubtab('bullet')">🔵 כדורים</button>
+                <button class="skin-subtab active" id="stab-cannon" onclick="switchSkinSubtab('cannon')">תותח</button>
+                <button class="skin-subtab" id="stab-bullet" onclick="switchSkinSubtab('bullet')">כדורים</button>
             </div>
             <div id="skin-grid-cannon" class="skin-grid"></div>
             <div id="skin-grid-bullet" class="skin-grid" style="display:none"></div>
         </div>
 
-        <button id="start-btn" onclick="startGame()">▶ התחל משחק</button>
+        <button id="start-btn" onclick="startGame()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18" aria-hidden="true">
+                <polygon points="5,2 17,10 5,18"/>
+            </svg>
+            התחל משחק
+        </button>
 
         <div id="dev-panel">
-            <button id="dev-toggle" onclick="toggleDevMode()">🔧 מצב פיתוח: כבוי</button>
+            <button id="dev-toggle" onclick="toggleDevMode()">מצב פיתוח: כבוי</button>
             <div id="dev-content">
                 <div class="dev-row">
-                    <button class="dev-reset-btn" onclick="devResetUpgrades()">🗑️ אפס שדרוגים</button>
+                    <button class="dev-reset-btn" onclick="devResetUpgrades()">אפס שדרוגים</button>
                 </div>
                 <div class="dev-row">
                     <label for="dev-wave">גל התחלה</label>
@@ -89,7 +87,16 @@
             </div>
         </div>
 
-        <div id="sound-toggle" onclick="toggleMute()" title="קול">🔊</div>
+        <button id="sound-toggle" onclick="toggleMute()" aria-label="הפעל/כבה קול">
+            <svg class="icon-sound-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            <svg class="icon-sound-off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+            </svg>
+        </button>
 
         <div id="controls-hint">← → / A D לזוז &nbsp;·&nbsp; תותח יורה אוטומטית</div>
     </div>
@@ -99,18 +106,23 @@
         <div id="canvas-wrapper">
             <canvas id="bgCanvas"   width="480" height="800"></canvas>
             <canvas id="gameCanvas" width="480" height="800"></canvas>
-            <button id="pause-btn" onclick="togglePause()" title="השהה">⏸</button>
+            <button id="pause-btn" onclick="togglePause()" aria-label="השהה/המשך">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                    <rect x="4" y="3" width="4" height="14" rx="1.5"/>
+                    <rect x="12" y="3" width="4" height="14" rx="1.5"/>
+                </svg>
+            </button>
             <div id="pause-overlay" style="display:none">
                 <div id="pause-menu">
-                    <div class="pause-title">⏸ השהיה</div>
-                    <button class="pause-menu-btn" onclick="togglePause()">▶ המשך</button>
-                    <button class="pause-menu-btn pause-exit-btn" onclick="exitToHome()">🏠 צא למסך הבית</button>
+                    <div class="pause-title">השהיה</div>
+                    <button class="pause-menu-btn" onclick="togglePause()">המשך</button>
+                    <button class="pause-menu-btn pause-exit-btn" onclick="exitToHome()">צא למסך הבית</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Load order matters: constants first, then classes, then main loop -->
+    <!-- Load order: base systems → entity classes → UI → game logic → home → main loop -->
     <script src="skins.js?v=7"></script>
     <script src="skins-cannon.js?v=7"></script>
     <script src="skins-cannon-b.js?v=7"></script>
@@ -152,7 +164,7 @@
             // מלא את רשימת הבוסטים בפאנל הפיתוח
             const sel = document.getElementById('dev-boost');
             sel.innerHTML = '<option value="">ללא בוסט</option>' +
-                RUN_UPGRADE_POOL.map(u => `<option value="${u.id}">${u.icon} ${u.name}</option>`).join('');
+                RUN_UPGRADE_POOL.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
         }
     </script>
 </body>

@@ -41,10 +41,29 @@ UI.prototype.drawRunUpgradePicker = function(ctx, options, hoverIdx) {
 
         const cx = r.x + r.w / 2;
 
-        ctx.font         = '36px Arial';
+        // Icon badge — colored circle with 2-letter abbreviation (no emoji)
+        const _BADGE_COLORS = {
+            'מג': '#5090e8', 'זה': '#d4a020', 'קפ': '#20a870', 'מה': '#e07020',
+            'חד': '#a060e0', 'מן': '#2090d0', 'לב': '#d04060', 'טי': '#60a0d0',
+            'פצ': '#d04020', 'קר': '#20a8c8', 'רפ': '#40b858',
+        };
+        const badgeColor = _BADGE_COLORS[opt.icon] || '#6080a0';
+        ctx.fillStyle    = badgeColor + '22';
+        ctx.beginPath();
+        ctx.arc(cx, r.y + 46, 26, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle  = badgeColor;
+        ctx.lineWidth    = isHover ? 2.5 : 1.8;
+        ctx.globalAlpha  = isHover ? 1 : 0.75;
+        ctx.beginPath();
+        ctx.arc(cx, r.y + 46, 26, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha  = 1;
+        ctx.fillStyle    = badgeColor;
+        ctx.font         = 'bold 18px Arial';
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(opt.icon, cx, r.y + 42);
+        ctx.fillText(opt.icon, cx, r.y + 46);
 
         ctx.font      = 'bold 14px Arial';
         ctx.fillStyle = '#ffffff';
@@ -103,12 +122,12 @@ UI.prototype.drawGameOver = function(ctx, wave, highScore, sessionCoins, returnT
 
     ctx.font      = '20px Arial';
     ctx.fillStyle = '#ffd700';
-    ctx.fillText('🪙 ' + sessionCoins.toLocaleString() + ' מטבעות נצברו', cx, cy + 4);
+    ctx.fillText(sessionCoins.toLocaleString() + ' מטבעות נצברו', cx, cy + 4);
 
     if (wave >= highScore) {
         ctx.font      = 'bold 18px Arial';
         ctx.fillStyle = '#ffaa00';
-        ctx.fillText('🏆 שיא חדש!', cx, cy + 46);
+        ctx.fillText('שיא חדש!', cx, cy + 46);
     } else {
         ctx.font      = '18px Arial';
         ctx.fillStyle = '#7090a0';

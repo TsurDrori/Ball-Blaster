@@ -48,7 +48,8 @@ class PowerUp {
         ctx.stroke();
 
         // Icon
-        const icons = { shield: '🛡️', fire: '🔥', heart: '❤️', ice: '❄️' };
+        // Plain Unicode symbols — not emoji, render with fillStyle color
+        const icons = { shield: '\u25A0', fire: '\u25B2', heart: '\u2665', ice: '\u2744' };
         ctx.font         = `${Math.floor(r * 1.3)}px Arial`;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';

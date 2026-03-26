@@ -73,7 +73,8 @@ class EnemyBall {
     }
 
     _typeIcon() {
-        const icons = { crystal: '💎', bomb: '💣', splitter: '✂️', fast: '⚡' };
+        // U+25C6 diamond · U+2715 multiply · U+00F7 division · U+00BB double angle
+        const icons = { crystal: '\u25C6', bomb: '\u2715', splitter: '\u00F7', fast: '\u00BB' };
         return icons[this.type] || null;
     }
 

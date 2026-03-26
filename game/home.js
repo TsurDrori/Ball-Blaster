@@ -59,7 +59,7 @@ function toggleDevMode() {
 
     const btn     = document.getElementById('dev-toggle');
     const content = document.getElementById('dev-content');
-    btn.textContent = devMode ? '🔧 מצב פיתוח: פעיל' : '🔧 מצב פיתוח: כבוי';
+    btn.textContent = devMode ? 'מצב פיתוח: פעיל' : 'מצב פיתוח: כבוי';
     btn.classList.toggle('dev-on', devMode);
     content.classList.toggle('open', devMode);
     document.getElementById('dev-panel').classList.toggle('dev-open', devMode);
@@ -114,7 +114,7 @@ function _showPrestigeToast(prevLevel) {
     const cycle = Math.floor(prevLevel / 5);
     const mult  = Math.pow(10, cycle);
     const toast = document.getElementById('prestige-toast');
-    toast.innerHTML = `🔥 פרסטיג'! רב-כדורי<br><span style="font-size:14px;color:#ffaa44">1 כדור = ×${mult} נזק מהמחזור הקודם</span>`;
+    toast.innerHTML = `פרסטיג'! רב-כדורי<br><span style="font-size:14px;color:#ffaa44">1 כדור = ×${mult} נזק מהמחזור הקודם</span>`;
     toast.classList.remove('show');
     void toast.offsetWidth;
     toast.classList.add('show');
@@ -171,7 +171,7 @@ function _renderSkinGrid(type, catalog, gridId) {
         const statusClass = isEquipped ? 'equipped' : isUnlocked ? 'unlocked' : 'locked';
 
         let priceText;
-        if (skin.price > 0)       priceText = `💎 ${skin.price.toLocaleString()}`;
+        if (skin.price > 0)       priceText = `◆ ${skin.price.toLocaleString()}`;
         else if (skin.mission)    priceText = skin.mission.text;
         else                      priceText = 'חינם';
 
@@ -181,11 +181,11 @@ function _renderSkinGrid(type, catalog, gridId) {
         } else if (isUnlocked) {
             btn = `<button class="skin-card-btn btn-equip" onclick="equipSkin('${skin.id}','${type}')">ללבוש</button>`;
         } else if (skin.mission) {
-            btn = `<div class="skin-card-btn btn-locked">🔒 ${skin.mission.text}</div>`;
+            btn = `<div class="skin-card-btn btn-locked">${skin.mission.text}</div>`;
         } else if (canAfford) {
-            btn = `<button class="skin-card-btn btn-buy" onclick="buySkin('${skin.id}','${type}')">💎 קנה</button>`;
+            btn = `<button class="skin-card-btn btn-buy" onclick="buySkin('${skin.id}','${type}')">◆ קנה</button>`;
         } else {
-            btn = `<div class="skin-card-btn btn-locked">💎 ${skin.price.toLocaleString()}</div>`;
+            btn = `<div class="skin-card-btn btn-locked">◆ ${skin.price.toLocaleString()}</div>`;
         }
 
         const rarity = skin.rarity || 'common';
@@ -244,11 +244,11 @@ function refreshHomeScreen() {
 
     const MAX_LEVELS = { fireRate: 10, damage: 8, multiShot: 15, ballSize: Infinity, lives: Infinity };
     const meta = {
-        fireRate:  { icon: '⚡', name: 'קצב ירי',   desc: lv => `${Math.round(10 / Math.max(0.025, 0.16 - (lv-1)*0.015))/10} כדורים/שנ'` },
-        damage:    { icon: '💥', name: 'עוצמה',     desc: lv => `נזק ${Math.min(8, lv)} לכדור` },
-        multiShot: { icon: '🎯', name: 'רב-כדורי',  desc: lv => { const cycle = Math.floor((lv-1)/5); const pos = (lv-1)%5; const total = cycle > 0 ? cycle + pos : pos + 1; if (cycle === 0) return `${total} כדורים במקביל`; const normals = pos; const mult = Math.pow(10,cycle); return normals > 0 ? `${cycle}💥×${mult} + ${normals} רגילים` : `${cycle}💥 כדורי ×${mult} נזק`; } },
-        ballSize:  { icon: '🔵', name: 'גודל כדור', desc: lv => `רדיוס ${9 + (lv-1)*2}` },
-        lives:     { icon: '❤️', name: 'חיים',       desc: lv => `${lv} חיים למשחק` },
+        fireRate:  { name: 'קצב ירי',   desc: lv => `${Math.round(10 / Math.max(0.025, 0.16 - (lv-1)*0.015))/10} כדורים/שנ'` },
+        damage:    { name: 'עוצמה',     desc: lv => `נזק ${Math.min(8, lv)} לכדור` },
+        multiShot: { name: 'רב-כדורי',  desc: lv => { const cycle = Math.floor((lv-1)/5); const pos = (lv-1)%5; const total = cycle > 0 ? cycle + pos : pos + 1; if (cycle === 0) return `${total} כדורים במקביל`; const normals = pos; const mult = Math.pow(10,cycle); return normals > 0 ? `${cycle}×${mult} + ${normals} רגילים` : `${cycle} כדורי ×${mult} נזק`; } },
+        ballSize:  { name: 'גודל כדור', desc: lv => `רדיוס ${9 + (lv-1)*2}` },
+        lives:     { name: 'חיים',       desc: lv => `${lv} חיים למשחק` },
     };
     for (const [type, m] of Object.entries(meta)) {
         const btn   = document.getElementById('btn-' + type);
@@ -257,7 +257,7 @@ function refreshHomeScreen() {
         const cost  = gameState.upgradeCost(type);
         const isMax = lv >= MAX_LEVELS[type];
         if (isMax) {
-            btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small><span class="max-badge">MAX</span></small>`;
+            btn.innerHTML = `${m.name}<br><small>${m.desc(lv)}</small><small><span class="max-badge">MAX</span></small>`;
             btn.className = 'upgrade-btn max-level';
             btn.disabled  = true;
         } else {
@@ -266,9 +266,9 @@ function refreshHomeScreen() {
             if (isPrestige) {
                 const nextCycle = Math.floor(lv / 5);
                 const mult = Math.pow(10, nextCycle);
-                btn.innerHTML = `🔥 ${m.name} — פרסטיג'!<br><small>← 1 כדור ×${mult} נזק</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
+                btn.innerHTML = `${m.name} — פרסטיג'!<br><small>1 כדור ×${mult} נזק</small><small>Lv.${lv} · ${cost.toLocaleString()}</small>`;
             } else {
-                btn.innerHTML = `${m.icon} ${m.name}<br><small>${m.desc(lv)}</small><small>Lv.${lv} · 🪙${cost.toLocaleString()}</small>`;
+                btn.innerHTML = `${m.name}<br><small>${m.desc(lv)}</small><small>Lv.${lv} · ${cost.toLocaleString()}</small>`;
             }
             btn.className = 'upgrade-btn' + (canAfford ? ' affordable' : '') + (isPrestige ? ' prestige' : '');
             btn.disabled  = false;
@@ -280,10 +280,7 @@ function refreshHomeScreen() {
 function toggleMute() {
     const muted = sound.toggleMute();
     const btn = document.getElementById('sound-toggle');
-    if (btn) {
-        btn.textContent = muted ? '🔇' : '🔊';
-        btn.classList.toggle('muted', muted);
-    }
+    if (btn) btn.classList.toggle('muted', muted);
 }
 
 // ── אתחול — הצג מסך בית ─────────────────────────────────────────────────────

@@ -21,16 +21,16 @@ const BOSS_NAMES = {
 };
 
 const BOSS_ICONS = {
-    shooter:    '🎯',
-    bomber:     '💣',
-    laser:      '⚡',
-    exploder:   '💥',
-    shield:     '🛡️',
-    spinner:    '🌀',
-    swarm:      '🐝',
-    teleporter: '👁️',
-    splitter:   '✂️',
-    spiral:     '🔮',
+    shooter:    '\u25CE',
+    bomber:     '\u2715',
+    laser:      '\u00BB',
+    exploder:   '\u2020',
+    shield:     '\u25A0',
+    spinner:    '\u2022',
+    swarm:      '\u2736',
+    teleporter: '\u25C6',
+    splitter:   '\u00F7',
+    spiral:     '\u2605',
 };
 
 // [dark, mid, light] — צבעי גוף לפי סוג

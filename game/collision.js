@@ -92,7 +92,7 @@ function checkCollisions() {
                             const maxLives = gameState.upgrades.lives + 2;
                             if (gameState.currentLives < maxLives) {
                                 gameState.currentLives++;
-                                floatingTexts.push(new FloatingText(cannon.x, cannon.y - 50, '💚 +חיים!', '#00e676', 24));
+                                floatingTexts.push(new FloatingText(cannon.x, cannon.y - 50, '+חיים!', '#00e676', 24));
                             }
                         }
                     }
@@ -114,7 +114,7 @@ function checkCollisions() {
             c.dead = true;
             if (c.isDiamond) {
                 gameState.collectDiamond();
-                floatingTexts.push(new FloatingText(c.x, c.y - 10, '💎 +1', '#00e5ff', 17));
+                floatingTexts.push(new FloatingText(c.x, c.y - 10, '\u25C6 +1', '#00e5ff', 17));
                 sound.coinCollect();
             } else {
                 gameState.collectCoin(c.value);

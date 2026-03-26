@@ -144,13 +144,13 @@ function fxShieldBreak(x, y) {
         });
     }
     shockwaves.push(new Shockwave(x, y, 'rgba(0,180,255,0.9)', 110, 320));
-    floatingTexts.push(new FloatingText(x, y - 32, '🛡️ חסם!', '#00aaff', 28));
+    floatingTexts.push(new FloatingText(x, y - 32, 'חסם!', '#00aaff', 28));
 }
 
 // Powerup collected — burst + floating label
 function fxPowerUpCollect(x, y, type) {
     const colorMap = { shield: '#00aaff', fire: '#ff6600', heart: '#ff2266', ice: '#aaf0ff' };
-    const labelMap = { shield: '🛡️ הגנה!', fire: '🔥 אש!', heart: '❤️ +חיים!', ice: '❄️ הכל קפוא!' };
+    const labelMap = { shield: 'הגנה!', fire: 'אש!', heart: '+חיים!', ice: 'הכל קפוא!' };
     const color    = colorMap[type] || '#ffffff';
     for (let i = 0; i < 22; i++) {
         _spawnP(x, y, {

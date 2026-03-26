@@ -113,12 +113,15 @@ canvas.addEventListener('click', e => {
     if (gameState.status === 'gameover') returnToHome();
 });
 
+const _ICON_PAUSE = '<svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><rect x="4" y="3" width="4" height="14" rx="1.5"/><rect x="12" y="3" width="4" height="14" rx="1.5"/></svg>';
+const _ICON_PLAY  = '<svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><polygon points="5,3 17,10 5,17"/></svg>';
+
 // ── Pause ─────────────────────────────────
 function togglePause() {
     if (gameState.status !== 'playing') return;
     gamePaused = !gamePaused;
     document.getElementById('pause-overlay').style.display = gamePaused ? 'flex' : 'none';
-    document.getElementById('pause-btn').textContent = gamePaused ? '▶' : '⏸';
+    document.getElementById('pause-btn').innerHTML = gamePaused ? _ICON_PLAY : _ICON_PAUSE;
     if (!gamePaused) {
         // מאפס את lastTime כדי שלא תהיה קפיצה בזמן
         lastTime = performance.now();
@@ -128,7 +131,7 @@ function togglePause() {
 function exitToHome() {
     gamePaused = false;
     document.getElementById('pause-overlay').style.display = 'none';
-    document.getElementById('pause-btn').textContent = '⏸';
+    document.getElementById('pause-btn').innerHTML = _ICON_PAUSE;
     gameState.endGame();
     returnToHome();
 }
@@ -156,7 +159,7 @@ function startGame() {
     gameRunning = true;
     gamePaused  = false;
     document.getElementById('pause-overlay').style.display = 'none';
-    document.getElementById('pause-btn').textContent = '⏸';
+    document.getElementById('pause-btn').innerHTML = _ICON_PAUSE;
     requestAnimationFrame(gameLoop);
 }
 
