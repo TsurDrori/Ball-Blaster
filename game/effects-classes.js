@@ -44,14 +44,53 @@ class ScreenShake {
     }
 }
 
+// ── אייקוני טקסט צף ───────────────────────
+function _ftIconSkull(ctx, x, y, s, col) {
+    // ראש עגול
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(x, y - s * 0.04, s * 0.46, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = s * 0.09; ctx.stroke();
+    // עיניים ריקות
+    ctx.fillStyle = 'rgba(0,0,0,0.82)';
+    ctx.beginPath(); ctx.arc(x - s * 0.17, y - s * 0.1, s * 0.13, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + s * 0.17, y - s * 0.1, s * 0.13, 0, Math.PI * 2); ctx.fill();
+    // חור אף
+    ctx.beginPath(); ctx.arc(x, y + s * 0.07, s * 0.07, 0, Math.PI * 2); ctx.fill();
+    // שיניים
+    const tw = s * 0.11, th = s * 0.14, ty = y + s * 0.24;
+    for (let i = -1; i <= 1; i++) ctx.fillRect(x + i * (tw + s * 0.04) - tw * 0.5, ty, tw, th);
+}
+
+function _ftIconScissors(ctx, x, y, s, col) {
+    ctx.strokeStyle = col; ctx.lineWidth = s * 0.22; ctx.lineCap = 'round';
+    // שני להבים
+    ctx.beginPath(); ctx.moveTo(x - s * 0.5, y - s * 0.38); ctx.lineTo(x + s * 0.44, y + s * 0.38); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - s * 0.5, y + s * 0.38); ctx.lineTo(x + s * 0.44, y - s * 0.38); ctx.stroke();
+    // ציר
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = s * 0.07;
+    ctx.beginPath(); ctx.arc(x, y, s * 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // ידיות
+    ctx.fillStyle = col; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = s * 0.08;
+    ctx.beginPath(); ctx.arc(x - s * 0.54, y - s * 0.41, s * 0.16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x - s * 0.54, y + s * 0.41, s * 0.16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+}
+
+function _drawFTIcon(ctx, icon, x, y, s, col) {
+    ctx.save();
+    if (icon === 'skull')    _ftIconSkull(ctx, x, y, s, col);
+    if (icon === 'scissors') _ftIconScissors(ctx, x, y, s, col);
+    ctx.restore();
+}
+
 // ── Floating Text ─────────────────────────
 class FloatingText {
-    constructor(x, y, text, color = '#FFD700', size = 22) {
+    constructor(x, y, text, color = '#FFD700', size = 22, icon = null) {
         this.x     = x;
         this.y     = y;
         this.text  = text;
         this.color = color;
         this.size  = size;
+        this.icon  = icon;
         this.alpha = 1.0;
         this.vy    = -80;
         this.life  = 1.0;
@@ -69,16 +108,35 @@ class FloatingText {
     draw(ctx) {
         if (this.life <= 0) return;
         ctx.save();
-        ctx.globalAlpha = this.alpha;
+        ctx.globalAlpha  = this.alpha;
         const fs = Math.floor(this.size * this.scale);
         ctx.font         = `bold ${fs}px Arial`;
-        ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.strokeStyle  = 'rgba(0,0,0,0.75)';
-        ctx.lineWidth    = 4;
-        ctx.strokeText(this.text, this.x, this.y);
-        ctx.fillStyle = this.color;
-        ctx.fillText(this.text, this.x, this.y);
+
+        if (this.icon) {
+            const iconS  = fs * 0.55;
+            const gap    = fs * 0.22;
+            const tw     = ctx.measureText(this.text).width;
+            const totalW = iconS * 2 + gap + tw;
+            const iconX  = this.x - totalW / 2 + iconS;
+            const textX  = this.x - totalW / 2 + iconS * 2 + gap;
+
+            _drawFTIcon(ctx, this.icon, iconX, this.y, iconS, this.color);
+
+            ctx.textAlign   = 'left';
+            ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+            ctx.lineWidth   = 4;
+            ctx.strokeText(this.text, textX, this.y);
+            ctx.fillStyle = this.color;
+            ctx.fillText(this.text, textX, this.y);
+        } else {
+            ctx.textAlign   = 'center';
+            ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+            ctx.lineWidth   = 4;
+            ctx.strokeText(this.text, this.x, this.y);
+            ctx.fillStyle = this.color;
+            ctx.fillText(this.text, this.x, this.y);
+        }
         ctx.restore();
     }
 
