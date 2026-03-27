@@ -7,7 +7,7 @@ const CANNON_SKINS = [
     { id: 'rocket',  name: 'רקטן',       emoji: '🚀',  price: 90,  mission: null,                                                rarity: 'rare'      },
     { id: 'rainbow', name: 'קשת בענן',   emoji: '🌈',  price: 0,   mission: { id: 'buy_4_skins',   text: 'קנה 4 סקינים' },      rarity: 'epic'      },
     { id: 'dragon',  name: 'דרקון',      emoji: '🐲',  price: 120, mission: null,                                                rarity: 'legendary' },
-    { id: 'shark',   name: 'כריש',       emoji: '🦈',  price: 70,  mission: null,                                                rarity: 'rare'      },
+    { id: 'shark',   name: 'לויתן',      emoji: '🐋',  price: 70,  mission: null,                                                rarity: 'rare'      },
     { id: 'unicorn', name: 'חד קרן',     emoji: '🦄',  price: 0,   mission: { id: 'reach_wave_15', text: 'הגע לגל 15' },        rarity: 'legendary' },
 ];
 

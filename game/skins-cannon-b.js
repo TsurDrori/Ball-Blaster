@@ -74,57 +74,160 @@ function _drawDragonCannon(ctx, c) {
 
 function _drawSharkCannon(ctx, c) {
     ctx.save();
-    const { x, y, w, h } = c;
+    const t = performance.now() * 0.001;
+    const { x, y } = c;
 
-    // זוהר ים
-    const g = ctx.createRadialGradient(x, y, 5, x, y, 72);
-    g.addColorStop(0, 'rgba(0,100,200,0.2)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 72, 0, Math.PI * 2); ctx.fill();
+    // זוהר ים כחול
+    const glow = ctx.createRadialGradient(x, y - 10, 5, x, y - 10, 80);
+    glow.addColorStop(0, 'rgba(0,90,200,0.22)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(x, y - 10, 80, 0, Math.PI * 2); ctx.fill();
 
     _skinShield(ctx, c);
 
-    // בסיס
-    ctx.beginPath(); ctx.ellipse(x, y + 20, w / 2, 24, 0, 0, Math.PI * 2);
-    const bg = ctx.createRadialGradient(x - 10, y + 10, 3, x, y + 20, w / 2);
-    bg.addColorStop(0, '#6090c0'); bg.addColorStop(0.6, '#304878'); bg.addColorStop(1, '#101828');
-    ctx.fillStyle = bg; ctx.fill();
-    ctx.strokeStyle = '#203050'; ctx.lineWidth = 2; ctx.stroke();
+    // קואורדינטות גוף הלויתן (ראש שמאל, זנב ימין, מבט צדדי)
+    const cx = x - 4,  cy = y - 14;
+    const rw = 46,     rh = 19;
 
-    // קנה — גוף כריש
-    const bw = 32, bh = h, bx = x - bw / 2, by = y - bh / 2;
-    const sbar = ctx.createLinearGradient(bx, 0, bx + bw, 0);
-    sbar.addColorStop(0, '#203050'); sbar.addColorStop(0.45, '#5888b8'); sbar.addColorStop(0.55, '#4070a0'); sbar.addColorStop(1, '#203050');
-    ctx.fillStyle = sbar;
-    ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6); ctx.fill();
-    ctx.strokeStyle = '#203050'; ctx.lineWidth = 2; ctx.stroke();
+    // === זנב ===
+    ctx.fillStyle = '#1a3858';
+    ctx.beginPath();
+    ctx.moveTo(cx + rw - 5, cy - 5);
+    ctx.lineTo(cx + rw + 19, cy - 16);
+    ctx.lineTo(cx + rw + 13, cy);
+    ctx.lineTo(cx + rw + 19, cy + 16);
+    ctx.lineTo(cx + rw - 5, cy + 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#0d2438'; ctx.lineWidth = 1.5; ctx.stroke();
 
-    // בטן לבנה
-    ctx.fillStyle = 'rgba(240,240,255,0.55)';
-    ctx.beginPath(); ctx.roundRect(x - 5, by + 10, 10, bh - 20, 4); ctx.fill();
+    // === גוף ראשי ===
+    const bodyGrad = ctx.createLinearGradient(cx, cy - rh, cx, cy + rh);
+    bodyGrad.addColorStop(0, '#5a8ab8');
+    bodyGrad.addColorStop(0.45, '#3a6888');
+    bodyGrad.addColorStop(1, '#1e3d58');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d2438'; ctx.lineWidth = 2; ctx.stroke();
 
-    // סנפיר גב
-    ctx.fillStyle = '#304878';
-    ctx.beginPath(); ctx.moveTo(x - 4, by + 10); ctx.lineTo(x + 13, by - 18); ctx.lineTo(x + 15, by + 10); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#203050'; ctx.lineWidth = 1.5; ctx.stroke();
+    // === בטן (חלק בהיר בתחתית הגוף) ===
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2);
+    ctx.clip();
+    const bellyGrad = ctx.createLinearGradient(cx, cy, cx, cy + rh);
+    bellyGrad.addColorStop(0, 'rgba(200,228,248,0)');
+    bellyGrad.addColorStop(0.5, 'rgba(200,228,248,0.62)');
+    bellyGrad.addColorStop(1, 'rgba(215,235,252,0.88)');
+    ctx.fillStyle = bellyGrad;
+    ctx.fillRect(cx - rw, cy, rw * 2, rh + 2);
+    ctx.restore();
 
-    // עין
-    const eyeY = by + bh * 0.45;
+    // === סנפיר גב (dorsal) ===
+    ctx.fillStyle = '#2a5070';
+    ctx.beginPath();
+    ctx.moveTo(cx + 7, cy - rh);
+    ctx.lineTo(cx + 20, cy - rh - 21);
+    ctx.lineTo(cx + 29, cy - rh + 1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#0d2438'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // === סנפיר פקטורלי (קדמי-תחתון) ===
+    ctx.fillStyle = '#2a5070';
+    ctx.beginPath();
+    ctx.moveTo(cx - 22, cy + 6);
+    ctx.lineTo(cx - 34, cy + 29);
+    ctx.quadraticCurveTo(cx - 16, cy + rh + 4, cx - 8, cy + rh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#0d2438'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // === עין ===
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(x - 8, eyeY, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#000000';
-    ctx.beginPath(); ctx.arc(x - 7, eyeY, 2.5, 0, Math.PI * 2); ctx.fill();
-
-    // פה עם שיניים
-    ctx.fillStyle = '#cc2222';
-    ctx.beginPath(); ctx.roundRect(x - 20, by - 7, 40, 13, [0, 0, 6, 6]); ctx.fill();
-    ctx.strokeStyle = '#882200'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx - 32, cy - 5, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#00111e';
+    ctx.beginPath(); ctx.arc(cx - 31, cy - 5, 2.8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 5; i++) {
-        const tx = x - 18 + i * 9;
-        ctx.beginPath(); ctx.moveTo(tx, by - 7); ctx.lineTo(tx + 4, by - 16); ctx.lineTo(tx + 8, by - 7); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 30, cy - 6.5, 1.1, 0, Math.PI * 2); ctx.fill();
+
+    // === חצי פה (מהצד) ===
+    ctx.strokeStyle = '#0d2438'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - rw + 2, cy + 3);
+    ctx.quadraticCurveTo(cx - 42, cy + 12, cx - 28, cy + 10);
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+
+    // === נחיר אחד ===
+    ctx.fillStyle = '#0d2438';
+    ctx.beginPath();
+    ctx.ellipse(cx - 24, cy - rh + 4, 3.8, 2.2, 0.25, 0, Math.PI * 2);
+    ctx.fill();
+
+    // === ארובה (blowhole) — מקום הירי ===
+    const bhoX = cx - 14;
+    const bhoY = cy - rh - 2;
+    ctx.fillStyle = '#091c2e';
+    ctx.beginPath();
+    ctx.ellipse(bhoX, bhoY, 5, 3, -0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2a5070'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(bhoX, bhoY, 5, 3, -0.15, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // === מים פורצים מהארובה (ירי) ===
+    if (c.muzzleFlash > 0) {
+        const frac = c.muzzleFlash / 0.06;
+        ctx.globalAlpha = frac;
+
+        // זוהר מים
+        const wg = ctx.createRadialGradient(bhoX, bhoY - 14, 0, bhoX, bhoY - 14, 34);
+        wg.addColorStop(0, 'rgba(160,230,255,0.9)');
+        wg.addColorStop(1, 'rgba(0,120,220,0)');
+        ctx.fillStyle = wg;
+        ctx.beginPath(); ctx.arc(bhoX, bhoY - 14, 34, 0, Math.PI * 2); ctx.fill();
+
+        // קרני מים
+        ctx.strokeStyle = '#a0d8ff'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(bhoX, bhoY); ctx.lineTo(bhoX - 4, bhoY - 30); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bhoX, bhoY); ctx.lineTo(bhoX + 9, bhoY - 27); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bhoX, bhoY); ctx.lineTo(bhoX - 11, bhoY - 21); ctx.stroke();
+        ctx.lineCap = 'butt';
+
+        // טיפות מים
+        ctx.fillStyle = '#c8eaff';
+        for (let i = 0; i < 6; i++) {
+            const ox = Math.sin(i * 2.09 + t * 8) * 11;
+            const oy = -(9 + i * 5.5);
+            ctx.beginPath(); ctx.arc(bhoX + ox, bhoY + oy, 2.4 - i * 0.12, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
     }
 
-    _skinMuzzleFlash(ctx, c, bx, by);
+    // === בסיס מים ===
+    const wBase = ctx.createLinearGradient(x, y + 4, x, y + 44);
+    wBase.addColorStop(0, 'rgba(22,65,140,0.55)');
+    wBase.addColorStop(1, 'rgba(8,28,75,0)');
+    ctx.fillStyle = wBase;
+    ctx.beginPath();
+    ctx.ellipse(x, y + 22, 64, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // גלים קטנים
+    ctx.strokeStyle = 'rgba(120,195,255,0.4)'; ctx.lineWidth = 1.5;
+    for (let wi = 0; wi < 3; wi++) {
+        const wox = (wi - 1) * 22;
+        ctx.beginPath();
+        ctx.moveTo(x - 40 + wox, y + 18);
+        ctx.quadraticCurveTo(x - 30 + wox, y + 13, x - 20 + wox, y + 18);
+        ctx.stroke();
+    }
+
     _skinHitFlash(ctx, c);
     ctx.restore();
 }
