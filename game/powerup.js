@@ -1,3 +1,80 @@
+// ── גרפיקות פאוור-אפ ──────────────────────────────────────────────────────────
+
+function _puShield(ctx, x, y, r, col) {
+    const s = r * 0.68;
+    ctx.fillStyle = col;
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x - s, y - s * 0.72);
+    ctx.lineTo(x + s, y - s * 0.72);
+    ctx.lineTo(x + s, y + s * 0.02);
+    ctx.quadraticCurveTo(x + s, y + s * 0.82, x, y + s * 1.12);
+    ctx.quadraticCurveTo(x - s, y + s * 0.82, x - s, y + s * 0.02);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // קו אופקי פנימי
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = s * 0.18;
+    ctx.beginPath(); ctx.moveTo(x - s * 0.78, y - s * 0.18); ctx.lineTo(x + s * 0.78, y - s * 0.18); ctx.stroke();
+}
+
+function _puFire(ctx, x, y, r, col) {
+    const s = r * 0.75;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(x, y + s);
+    ctx.quadraticCurveTo(x - s * 0.95, y + s * 0.2, x - s * 0.42, y - s * 0.28);
+    ctx.quadraticCurveTo(x - s * 0.18, y - s * 0.78, x, y - s);
+    ctx.quadraticCurveTo(x + s * 0.18, y - s * 0.78, x + s * 0.42, y - s * 0.28);
+    ctx.quadraticCurveTo(x + s * 0.95, y + s * 0.2, x, y + s);
+    ctx.fill();
+    // ליבה בהירה
+    ctx.fillStyle = 'rgba(255,255,180,0.65)';
+    ctx.beginPath();
+    ctx.moveTo(x, y + s * 0.28);
+    ctx.quadraticCurveTo(x - s * 0.32, y, x - s * 0.1, y - s * 0.32);
+    ctx.quadraticCurveTo(x, y - s * 0.6, x + s * 0.1, y - s * 0.32);
+    ctx.quadraticCurveTo(x + s * 0.32, y, x, y + s * 0.28);
+    ctx.fill();
+}
+
+function _puHeart(ctx, x, y, r, col) {
+    const s = r * 0.68;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(x, y + s * 0.65);
+    ctx.bezierCurveTo(x - s * 1.22, y + s * 0.08, x - s * 1.22, y - s, x, y - s * 0.22);
+    ctx.bezierCurveTo(x + s * 1.22, y - s, x + s * 1.22, y + s * 0.08, x, y + s * 0.65);
+    ctx.fill();
+    // הדגשה
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.beginPath();
+    ctx.ellipse(x - s * 0.38, y - s * 0.32, s * 0.28, s * 0.18, -0.6, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function _puIce(ctx, x, y, r, col) {
+    const s = r * 0.72;
+    ctx.strokeStyle = col; ctx.lineWidth = r * 0.15; ctx.lineCap = 'round';
+    for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        // זרוע ראשית
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(a) * s, y + Math.sin(a) * s);
+        ctx.stroke();
+        // ענפי V
+        const bx = x + Math.cos(a) * s * 0.55, by = y + Math.sin(a) * s * 0.55;
+        const pa = a + Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(bx + Math.cos(pa) * s * 0.28, by + Math.sin(pa) * s * 0.28);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(bx - Math.cos(pa) * s * 0.28, by - Math.sin(pa) * s * 0.28);
+        ctx.stroke();
+    }
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(x, y, r * 0.13, 0, Math.PI * 2); ctx.fill();
+}
+
+// ── מחלקת PowerUp ──────────────────────────────────────────────────────────────
 class PowerUp {
     constructor(x, type) {
         this.x      = x;
@@ -47,13 +124,13 @@ class PowerUp {
         ctx.fill();
         ctx.stroke();
 
-        // Icon
-        // Plain Unicode symbols — not emoji, render with fillStyle color
-        const icons = { shield: '\u25A0', fire: '\u25B2', heart: '\u2665', ice: '\u2744' };
-        ctx.font         = `${Math.floor(r * 1.3)}px Arial`;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(icons[this.type], this.x, this.y + 1);
+        // אייקון מצויר
+        const iconColors = { shield: '#00aaff', fire: '#ff8800', heart: '#ff2266', ice: '#aaf0ff' };
+        const col = iconColors[this.type] || '#ffffff';
+        if      (this.type === 'shield') _puShield(ctx, this.x, this.y, r, col);
+        else if (this.type === 'fire')   _puFire  (ctx, this.x, this.y, r, col);
+        else if (this.type === 'heart')  _puHeart (ctx, this.x, this.y, r, col);
+        else if (this.type === 'ice')    _puIce   (ctx, this.x, this.y, r, col);
 
         ctx.restore();
     }
